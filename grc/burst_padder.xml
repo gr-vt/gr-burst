@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<block>
+  <name>Burst Padder</name>
+  <key>burst_padder</key>
+  <category>burst</category>
+  <import>import burst</import>
+  <make>burst.padder($blocksize)</make>
+
+  <param>
+    <name>Block Size Bits</name>
+    <key>blocksize</key>
+    <value>144</value>
+    <type>int</type>
+  </param>
+
+  <sink>
+    <name>pdus</name>
+    <type>message</type>
+    <optional>1</optional>
+  </sink>
+
+  <source>
+    <name>pdus</name>
+    <type>message</type>
+    <optional>1</optional>
+  </source>
+
+</block>

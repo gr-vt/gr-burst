@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<block>
+  <name>Async PDU Bit Unpacker</name>
+  <key>burst_unpacker</key>
+  <category>burst</category>
+  <import>import burst</import>
+  <make>burst.unpacker()</make>
+
+  <sink>
+    <name>packed_pdus</name>
+    <type>message</type>
+    <optional>1</optional>
+  </sink>
+  <source>
+    <name>unpacked_pdus</name>
+    <type>message</type>
+    <optional>1</optional>
+  </source>
+
+</block>

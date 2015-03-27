@@ -1,0 +1,58 @@
+<?xml version="1.0"?>
+<block>
+  <name>symbol_mapper_msg</name>
+  <key>burst_symbol_mapper_msg</key>
+  <category>burst</category>
+  <import>import burst</import>
+  <import>import mapper</import>
+  <import>import cmath</import>
+  <import>import math</import>
+  <make>burst.symbol_mapper_msg($mod_type, $symbol_values, $offset)</make>
+
+  <param>
+    <name>Modulaton</name>
+    <key>mod_type</key>
+    <type>enum</type>
+    <option>
+        <name>BPSK</name>
+        <key>mapper.BPSK</key>
+    </option>
+    <option>
+        <name>Pi/2BPSK</name>
+        <key>mapper.P2BPSK</key>
+    </option>
+    <option>
+        <name>QPSK</name>
+        <key>mapper.QPSK</key>
+    </option>
+    <option>
+        <name>8PSK</name>
+        <key>mapper.PSK8</key>
+    </option>
+  </param>
+
+  <param>
+    <name>Symbol Values</name>
+    <key>symbol_values</key>
+    <type>int_vector</type>
+  </param>
+
+  <param>
+    <name>Phase Offset</name>
+    <key>offset</key>
+    <value>cmath.exp(0.25 * 1.0j * math.pi)</value>
+    <type>raw</type>
+  </param>
+
+  <sink>
+    <name>pdus</name>
+    <type>message</type>
+    <optional>1</optional>
+  </sink>
+
+  <source>
+    <name>cpdus</name>
+    <type>message</type>
+    <optional>1</optional>
+  </source>
+</block>

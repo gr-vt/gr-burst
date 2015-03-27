@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<block>
+  <name>Burst FEC Decoder</name>
+  <key>burst_decoder</key>
+  <category>burst</category>
+  <import>import burst</import>
+  <make>burst.cpdu_matlab_writer()</make>
+
+  <param>
+    <name>FEC Code Def</name>
+    <key>code</key>
+    <value>None</value>
+    <type>raw</type>
+  </param>
+
+  <sink>
+    <name>fpdus</name>
+    <type>message</type>
+    <optional>1</optional>
+  </sink>
+
+  <source>
+    <name>pdus</name>
+    <type>message</type>
+    <optional>1</optional>
+  </source>
+</block>

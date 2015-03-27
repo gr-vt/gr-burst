@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<block>
+  <name>Burst Scheduler</name>
+  <key>burst_scheduler</key>
+  <category>burst</category>
+  <import>import burst</import>
+  <make>burst.burst_scheduler()</make>
+
+  <sink>
+    <name>sched_pdu</name>
+    <type>message</type>
+    <optional>1</optional>
+  </sink>
+
+  <sink>
+    <name>nproduced</name>
+    <type>message</type>
+    <optional>1</optional>
+  </sink>
+
+  <source>
+    <name>sched_pdu</name>
+    <type>message</type>
+    <optional>1</optional>
+  </source>
+
+</block>

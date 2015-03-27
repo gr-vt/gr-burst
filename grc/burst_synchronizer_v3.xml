@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<block>
+  <name>Burst Feedforward QPSK Symbol Synchronizer (v3)</name>
+  <key>burst_synchronizer_v3</key>
+  <category>burst</category>
+  <import>import burst</import>
+  <make>burst.synchronizer_v3($sps, $fs)</make>
+
+  <param>
+    <name>Samples per Symbol</name>
+    <key>sps</key>
+    <value>2.0</value>
+    <type>float</type>
+  </param>
+
+  <param>
+    <name>Sample Rate</name>
+    <key>fs</key>
+    <value>100000</value>
+    <type>float</type>
+  </param>
+
+  <sink>
+    <name>cpdus</name>
+    <type>message</type>
+    <optional>1</optional>
+  </sink>
+
+  <source>
+    <name>cpdus</name>
+    <type>message</type>
+    <optional>1</optional>
+  </source>
+  
+</block>

@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<block>
+  <name>Burst Randomizer</name>
+  <key>burst_randomizer</key>
+  <category>burst</category>
+  <import>import burst</import>
+  <make>burst.randomizer($p, $iv, $ml)</make>
+
+  <param>
+    <name>Polynomial</name>
+    <key>p</key>
+    <value>[0,14,15]</value>
+    <type>int_vector</type>
+  </param>
+  
+  <param>
+    <name>Initial Fill</name>
+    <key>iv</key>
+    <value>[1,0,0,1,0,1,0,1,0,0,0,0,0,0,0]</value>
+    <type>int_vector</type>
+  </param>
+
+  <param>
+    <name>Max Length</name>
+    <key>ml</key>
+    <value>100000</value>
+    <type>int</type>
+  </param>
+
+  <sink>
+    <name>pdus</name>
+    <type>message</type>
+    <optional>1</optional>
+  </sink>
+  <source>
+    <name>pdus</name>
+    <type>message</type>
+    <optional>1</optional>
+  </source>
+
+</block>

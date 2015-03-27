@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<block>
+  <name>Burst Binary PDU to FPDU</name>
+  <key>burst_tofpdu</key>
+  <category>burst</category>
+  <import>import burst</import>
+  <make>burst.slicer()</make>
+
+  <sink>
+    <name>pdus</name>
+    <type>message</type>
+    <optional>1</optional>
+  </sink>
+  <source>
+    <name>fpdus</name>
+    <type>message</type>
+    <optional>1</optional>
+  </source>
+
+</block>

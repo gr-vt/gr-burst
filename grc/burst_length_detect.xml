@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<block>
+  <name>Burst Length Detector</name>
+  <key>burst_length_detect</key>
+  <category>burst</category>
+  <import>import burst</import>
+  <make>burst.length_detect()</make>
+
+  <sink>
+    <name>cpdus</name>
+    <type>message</type>
+    <optional>1</optional>
+  </sink>
+  <source>
+    <name>cpdus</name>
+    <type>message</type>
+    <optional>1</optional>
+  </source>
+
+</block>

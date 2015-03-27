@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<block>
+  <name>Burst Preamble Correlator</name>
+  <key>burst_preamble_correlator</key>
+  <category>burst</category>
+  <import>import burst</import>
+  <make>burst.preamble_correlator($sps, $ro, $pre)</make>
+  
+  <param>
+    <name>Samples per Symbol</name>
+    <key>sps</key>
+    <value>2</value>
+    <type>int</type>
+  </param>
+
+  <param>
+    <name>RRC Filt Rolloff</name>
+    <key>ro</key>
+    <value>0.35</value>
+    <type>real</type>
+  </param>
+
+  <param>
+    <name>Preamble Bits</name>
+    <key>pre</key>
+    <value>[0,0,0,0,0,0,1,1,0,1,1,0,1,1,0,0,1,1,1,1,0,0,0,0]</value>
+    <type>int_vector</type>
+  </param>
+
+  <sink>
+    <name>samples</name>
+    <type>complex</type>
+  </sink>
+  <source>
+    <name>correlation_magnitude</name>
+    <type>float</type>
+  </source>
+
+</block>

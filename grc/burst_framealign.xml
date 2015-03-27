@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<block>
+  <name>Burst Frame Align</name>
+  <key>burst_framealign</key>
+  <category>burst</category>
+  <import>import burst</import>
+  <make>burst.framealign($skip, $bs)</make>
+
+  <param>
+    <name>Skip</name>
+    <key>skip</key>
+    <value>24</value>
+    <type>int</type>
+  </param>
+  
+  <param>
+    <name>Blocksize</name>
+    <key>bs</key>
+    <value>1024</value>
+    <type>int</type>
+  </param>
+
+  <sink>
+    <name>fpdus</name>
+    <type>message</type>
+    <optional>1</optional>
+  </sink>
+
+  <source>
+    <name>fpdus</name>
+    <type>message</type>
+    <optional>1</optional>
+  </source>
+</block>

@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<block>
+  <name>Burst ARQ</name>
+  <key>burst_arq</key>
+  <category>burst</category>
+  <import>import burst</import>
+  <make>burst.arq($timeout, $max_attempts)</make>
+
+  <param>
+    <name>Timeout (s)</name>
+    <key>timeout</key>
+    <value>2.5</value>
+    <type>float</type>
+  </param>
+
+  <param>
+    <name>Max Attempts</name>
+    <key>max_attempts</key>
+    <value>3</value>
+    <type>int</type>
+  </param>
+
+  <sink>
+    <name>rx_in</name>
+    <type>message</type>
+    <optional>1</optional>
+  </sink>
+  <sink>
+    <name>tx_in</name>
+    <type>message</type>
+    <optional>1</optional>
+  </sink>
+
+  <source>
+    <name>rx_out</name>
+    <type>message</type>
+    <optional>1</optional>
+  </source>
+  <source>
+    <name>tx_out</name>
+    <type>message</type>
+    <optional>1</optional>
+  </source>
+
+</block>

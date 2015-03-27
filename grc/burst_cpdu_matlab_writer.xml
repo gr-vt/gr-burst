@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<block>
+  <name>Burst CPDU Matlab Writer</name>
+  <key>burst_cpdu_matlab_writer</key>
+  <category>burst</category>
+  <import>import burst</import>
+  <make>burst.cpdu_matlab_writer()</make>
+
+  <sink>
+    <name>cpdus</name>
+    <type>message</type>
+    <optional>1</optional>
+  </sink>
+
+</block>

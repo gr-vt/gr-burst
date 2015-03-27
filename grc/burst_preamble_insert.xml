@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<block>
+  <name>Burst Preamble Insert</name>
+  <key>burst_preamble_insert</key>
+  <category>burst</category>
+  <import>import burst</import>
+  <make>burst.preamble_insert($pre)</make>
+
+  <param>
+    <name>Preamble Bits</name>
+    <key>pre</key>
+    <value>[0,0,0,0,0,0,1,1,0,1,1,0,1,1,0,0,1,1,1,1,0,0,0,0]</value>
+    <type>int_vector</type>
+  </param>
+
+  <sink>
+    <name>pdus</name>
+    <type>message</type>
+    <optional>1</optional>
+  </sink>
+  <source>
+    <name>pdus</name>
+    <type>message</type>
+    <optional>1</optional>
+  </source>
+
+</block>

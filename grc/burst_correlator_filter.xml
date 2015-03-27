@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<block>
+  <name>Correlator Filter</name>
+  <key>burst_correlator_filter</key>
+  <category>burst</category>
+  <import>import burst</import>
+  <make>burst.correlator_filter($l1, $i1, $thresh)</make>
+  
+  <param>
+    <name>Mu MA Len</name>
+    <key>l1</key>
+    <value>100</value>
+    <type>int</type>
+  </param>
+  
+  <param>
+    <name>Sigma alpha</name>
+    <key>i1</key>
+    <value>1e-4</value>
+    <type>real</type>
+  </param>
+  
+  <param>
+    <name>Offset</name>
+    <key>thresh</key>
+    <value>-10</value>
+    <type>float</type>
+  </param>
+
+  <sink>
+    <name>in</name>
+    <type>float</type>
+  </sink>
+
+  <source>
+    <name>out</name>
+    <type>float</type>
+  </source>
+</block>

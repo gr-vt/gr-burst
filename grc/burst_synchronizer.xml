@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<block>
+  <name>Burst Feedforward PSK Symbol Synchronizer</name>
+  <key>burst_synchronizer</key>
+  <category>burst</category>
+  <import>import burst</import>
+  <make>burst.synchronizer($sps)</make>
+
+  <param>
+    <name>Samples per Symbol</name>
+    <key>sps</key>
+    <value>2.0</value>
+    <type>float</type>
+  </param>
+
+  <sink>
+    <name>cpdus</name>
+    <type>message</type>
+    <optional>1</optional>
+  </sink>
+
+  <source>
+    <name>cpdus</name>
+    <type>message</type>
+    <optional>1</optional>
+  </source>
+  
+  <source>
+    <name>timing_metric</name>
+    <type>message</type>
+    <optional>1</optional>
+  </source>
+  
+  <source>
+    <name>sym_timed</name>
+    <type>message</type>
+    <optional>1</optional>
+  </source>
+  
+  <source>
+    <name>phase_ramp</name>
+    <type>message</type>
+    <optional>1</optional>
+  </source>
+</block>

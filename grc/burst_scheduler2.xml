@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<block>
+  <name>Burst Scheduler2</name>
+  <key>burst_scheduler2</key>
+  <category>burst</category>
+  <import>import burst</import>
+  <make>burst.burst_scheduler2($fs)</make>
+
+  <param>
+    <name>Sample Rate</name>
+    <key>fs</key>
+    <value>samp_rate</value>
+    <type>real</type>
+  </param>
+
+  <sink>
+    <name>sched_pdu</name>
+    <type>message</type>
+    <optional>1</optional>
+  </sink>
+
+  <sink>
+    <name>nproduced</name>
+    <type>message</type>
+    <optional>1</optional>
+  </sink>
+
+  <source>
+    <name>sched_pdu</name>
+    <type>message</type>
+    <optional>1</optional>
+  </source>
+
+</block>
