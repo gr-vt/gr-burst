@@ -32,4 +32,16 @@
     <optional>1</optional>
   </source>
   
+  <source>
+    <name>debug_post_cfo</name>
+    <type>message</type>
+    <optional>1</optional>
+  </source>
+
+  <source>
+    <name>debug_pre_xcorr</name>
+    <type>message</type>
+    <optional>1</optional>
+  </source>
+
 </block>
