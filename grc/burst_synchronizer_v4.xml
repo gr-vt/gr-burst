@@ -4,7 +4,7 @@
   <key>burst_synchronizer_v4</key>
   <category>burst</category>
   <import>import burst</import>
-  <make>burst.synchronizer_v4($sps, $fs)</make>
+  <make>burst.synchronizer_v4($sps, $fs, $preamble_bits, $sym_mapping)</make>
 
   <param>
     <name>Samples per Symbol</name>
@@ -43,5 +43,20 @@
     <type>message</type>
     <optional>1</optional>
   </source>
+  
+  <param>
+    <name>Preamble Bits</name>
+    <key>preamble_bits</key>
+    <value>[0, 1, 0, 0, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 0, 0, 0]</value>
+    <type>uchar_vector</type>
+  </param>
+  
+  <param>
+    <name>Symbol Values</name>
+    <key>sym_mapping</key>
+    <value>[0,1,3,2]</value>
+    <type>int_vector</type>
+  </param>
+  
 
 </block>

@@ -46,7 +46,7 @@ namespace gr {
        * class. burst::synchronizer_v4::make is the public interface for
        * creating new instances.
        */
-      static sptr make(double Fs, int sps);
+      static sptr make(double Fs, int sps, std::vector<unsigned char> preamble_bits, std::vector<int> sym_mapping);
       virtual void enableDebugMode() = 0;
       virtual void handler(pmt::pmt_t msg) = 0;
     };

@@ -34,6 +34,8 @@
 #include <gsl/gsl_complex_math.h>
 #include <gsl/gsl_matrix_complex_double.h>
 
+#include <mapper/constellation.h>
+
 namespace gr {
   namespace burst {
 
@@ -44,8 +46,19 @@ namespace gr {
 
     	double Fs = 100e3;
     	int sps = 2;
+    	unsigned char preamble_bits_arr[96] = {0, 1, 0, 0, 1, 0, 1, 1, 1, 1, 0, 1, 0,
+								1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0,
+								0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0,
+								1, 1, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0,
+								1, 0, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 0,
+								0, 1, 1, 1, 1, 0, 0, 1, 1, 0, 0, 0, 0,
+								0, 0, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 0,
+								1, 1, 0, 0, 0};
+    	std::vector<unsigned char> preamble_bits(&preamble_bits_arr[0], &preamble_bits_arr[0]+96);
+    	std::vector<int> sym_mapping(4);
+    	sym_mapping[0] = 0; sym_mapping[1] = 1; sym_mapping[2] = 3; sym_mapping[3] = 2;
     	synchronizer_v4::sptr sync_v4 =
-			synchronizer_v4::make(Fs, sps);
+			synchronizer_v4::make(Fs, sps, preamble_bits, sym_mapping);
 		sync_v4->enableDebugMode();
 
     	std::string filename = "/tmp/burst1.txt";
