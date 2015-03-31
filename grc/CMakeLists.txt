@@ -36,9 +36,9 @@ install(FILES
 	burst_correlator_filter.xml
 	burst_length_detect.xml
     burst_cpdu_matlab_writer.xml
-    burst_synchronizer.xml
-    burst_synchronizer_v2.xml
-    burst_synchronizer_v3.xml
+    #burst_synchronizer.xml
+    #burst_synchronizer_v2.xml
+    #burst_synchronizer_v3.xml
     burst_decoder.xml
     burst_length_detect_c.xml
     burst_synchronizer_v4.xml DESTINATION share/gnuradio/grc/blocks

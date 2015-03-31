@@ -35,6 +35,7 @@
 #include <algorithm>    // std::reverse
 
 #include <gnuradio/filter/mmse_fir_interpolator_cc.h>
+#include <stdexcept>
 
 namespace gr {
   namespace burst {
@@ -190,7 +191,7 @@ namespace gr {
 			filename = "/tmp/preSyms_x2_fliplr_conj.txt";
 			qa_helpers::writeComplexFile(filename, preSyms_x2_fliplr_conj);
 
-			throw std::exception("test");
+			throw std::exception();
 		}
 
     	debugMode = false;
