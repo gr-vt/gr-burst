@@ -129,7 +129,11 @@ namespace gr {
     {
     	message_port_register_in(pmt::mp("cpdus"));
 		message_port_register_out(pmt::mp("cpdus"));
+		message_port_register_out(pmt::mp("debug_post_cfo"));
+		message_port_register_out(pmt::mp("debug_pre_xcorr"));
 		set_msg_handler(pmt::mp("cpdus"), boost::bind(&synchronizer_v4_impl::handler, this, _1));
+
+        std::cout << "v4 sync\n";
 
     	d_Fs = Fs;
     	d_sps = sps;
@@ -438,6 +442,14 @@ namespace gr {
 			qa_helpers::writeComplexFile(filename, eqBurst);
 		}
 
+
+        // publish debug port #1
+        if(1){
+            pmt::pmt_t cfo_vec = pmt::init_c32vector(eqBurst.size(), &eqBurst[0]);
+            message_port_pub(pmt::mp("debug_post_cfo"), pmt::cons( meta, cfo_vec ) );
+        }
+
+        // search for start index/timing
 		std::vector<gr_complex> preCrossCorr_cmplx(96+eqBurst.size()-1);
 		conv(&eqBurst[0], eqBurst.size(), preSyms_x2_fliplr_conj, 96, preCrossCorr_cmplx);
 
@@ -462,6 +474,12 @@ namespace gr {
 			preambleIdxStartVec[0] = preambleIdxStart;
 			qa_helpers::writeFloatFile(filename, preambleIdxStartVec);
 		}
+
+        // publish debug port #2
+        if(1){
+            pmt::pmt_t xcorr_vec = pmt::init_f32vector(preCrossCorr.size(), &preCrossCorr[0]);
+            message_port_pub(pmt::mp("debug_pre_xcorr"), pmt::cons( meta, xcorr_vec ) );
+        }
 
 		if(preambleIdxStart<0) {
 			// means we didn't find the preamble, quit
