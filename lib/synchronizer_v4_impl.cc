@@ -559,7 +559,8 @@ namespace gr {
 		}
 
 		// put into new pdu and send
-		pmt::pmt_t newvec = pmt::init_c32vector(phRecoveredSyms.size(), &phRecoveredSyms[0]);
+        int offset = (96)/2-1;
+		pmt::pmt_t newvec = pmt::init_c32vector(phRecoveredSyms.size()-offset, &phRecoveredSyms[offset]);
 		msg = pmt::cons( meta, newvec );
 		message_port_pub(pmt::mp("cpdus"), msg);
 	}
