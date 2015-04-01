@@ -133,7 +133,7 @@ namespace gr {
 		message_port_register_out(pmt::mp("debug_pre_xcorr"));
 		set_msg_handler(pmt::mp("cpdus"), boost::bind(&synchronizer_v4_impl::handler, this, _1));
 
-        std::cout << "v4 sync\n";
+        std::cout << "Fs=" << Fs << " sps = " << sps << "\n"; fflush(stdout);
 
     	d_Fs = Fs;
     	d_sps = sps;
