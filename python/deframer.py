@@ -93,7 +93,6 @@ class deframer(gr.sync_block):
         # send it on its way
         payload = numpy.fromstring(payload, dtype=numpy.uint8);
         v = pmt.to_pmt(payload);
-        meta = pmt.make_dict();
         meta = pmt.dict_add(meta, pmt.intern("timestamp"), pmt.from_double(time.time()));
         meta = pmt.dict_add(meta, pmt.intern("npkt"), pmt.from_long(self.npkt));
         meta = pmt.dict_add(meta, pmt.intern("npkt_hok"), pmt.from_long(self.npkt_hok));

@@ -159,7 +159,7 @@ namespace gr {
     	debugMode = true;
     }
 
-    void synchronizer_v4_impl::qpskBurstCFOCorrect(gr_complex* x_in, int burstSize) {
+    float synchronizer_v4_impl::qpskBurstCFOCorrect(gr_complex* x_in, int burstSize) {
 		// TODO: maybe we can have a fixed burst size, only calculate cfo over a certain burst size
 		// then we can statically create the fft engine in the constructor, will probably be a lot faster
 		if(burstSize%2!=0) {
@@ -215,6 +215,8 @@ namespace gr {
 
 		// correct for cfo
 		shiftFreq(&x_in[0], burstSize, d_Fs, cfoEstimate, 0);
+
+        return cfoEstimate;
 	}
 
     void synchronizer_v4_impl::shiftFreq(gr_complex* buf, int bufLen, double Fs, double freq, double tStart) {
@@ -435,7 +437,7 @@ namespace gr {
 		}
 
 		// perform cfo correction
-		qpskBurstCFOCorrect(&eqBurst[0], eqBurst.size());
+		float cfo = qpskBurstCFOCorrect(&eqBurst[0], eqBurst.size());
 
 		if(debugMode) {
 			std::string filename = "/tmp/gr_burstCFOCorrected.txt";
@@ -561,6 +563,8 @@ namespace gr {
 		// put into new pdu and send
         int offset = (96)/2-1;
 		pmt::pmt_t newvec = pmt::init_c32vector(phRecoveredSyms.size()-offset, &phRecoveredSyms[offset]);
+        meta = pmt::dict_add(meta, pmt::mp("cfo"), pmt::mp(cfo));
+        meta = pmt::dict_add(meta, pmt::mp("sync_delay"), pmt::mp(preambleIdxStart));
 		msg = pmt::cons( meta, newvec );
 		message_port_pub(pmt::mp("cpdus"), msg);
 	}

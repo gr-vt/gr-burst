@@ -35,7 +35,7 @@ namespace gr {
     class synchronizer_v4_impl : public synchronizer_v4
     {
      private:
-      void qpskBurstCFOCorrect(gr_complex* x, int burstSize);
+      float qpskBurstCFOCorrect(gr_complex* x, int burstSize);
       void shiftFreq(gr_complex* buf, int bufLen, double Fs, double freq, double tStart);
       void determineOptimalFilter(gsl_vector_complex* w, gr_complex* x, int xLen);
       void qpskFirstOrderPLL(gr_complex* x, int size, float alpha, gr_complex* y);
