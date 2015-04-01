@@ -57,20 +57,4 @@
     <type>message</type>
     <optional>1</optional>
   </source>
-  
-  <param>
-    <name>Preamble Bits</name>
-    <key>preamble_bits</key>
-    <value>[0, 1, 0, 0, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 0, 0, 0]</value>
-    <type>int_vector</type>
-  </param>
-  
-  <param>
-    <name>Symbol Values</name>
-    <key>sym_mapping</key>
-    <value>[0,1,3,2]</value>
-    <type>int_vector</type>
-  </param>
-  
-
 </block>
