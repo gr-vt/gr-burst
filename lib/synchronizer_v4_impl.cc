@@ -34,6 +34,7 @@
 #include <volk/volk.h>
 
 #include <algorithm>    // std::reverse
+#include <gnuradio/filter/firdes.h>
 
 namespace gr {
   namespace burst {
@@ -88,7 +89,10 @@ namespace gr {
 				jj++;
 			}
 		}
-		// TODO: filter the preSyms_xR_fliplr_conj
+		// TODO: currently the rate matched preamble correlation is not interpolated, just upsampled
+		// this seems to work great, but perhaps it is worth doing filtering as well to see if better
+		// results can be achieved.  Theoretically, we should get stronger correlation peaks if it is
+		// interpolated b/c the intermediary samples would contribute to the correlations strength as well
 
 		std::reverse(preSyms_fliplr_conj.begin(),preSyms_fliplr_conj.end());			// flip the x1 preamble symbols
     	std::reverse(preSyms_xR_fliplr_conj.begin(),preSyms_xR_fliplr_conj.end());		// flip the x2 preamble symbols
