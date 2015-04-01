@@ -32,89 +32,12 @@
 
 #include <volk/volk_typedefs.h>
 #include <volk/volk.h>
-#include <algorithm>    // std::reverse
 
-#include <gnuradio/filter/mmse_fir_interpolator_cc.h>
-#include <stdexcept>
+#include <algorithm>    // std::reverse
+#include <gnuradio/filter/firdes.h>
 
 namespace gr {
   namespace burst {
-
-//    const gr_complex synchronizer_v4_impl::preSyms_fliplr_conj[48] =
-//        {0.70710677-0.70710677j,  0.70710677+0.70710677j,
-//        -0.70710677-0.70710677j, -0.70710677-0.70710677j,
-//        -0.70710677-0.70710677j, -0.70710677+0.70710677j,
-//        -0.70710677+0.70710677j, -0.70710677+0.70710677j,
-//         0.70710677-0.70710677j,  0.70710677-0.70710677j,
-//         0.70710677-0.70710677j, -0.70710677+0.70710677j,
-//         0.70710677-0.70710677j, -0.70710677+0.70710677j,
-//        -0.70710677+0.70710677j,  0.70710677-0.70710677j,
-//        -0.70710677-0.70710677j, -0.70710677+0.70710677j,
-//        -0.70710677+0.70710677j, -0.70710677-0.70710677j,
-//        -0.70710677-0.70710677j,  0.70710677+0.70710677j,
-//         0.70710677-0.70710677j,  0.70710677-0.70710677j,
-//         0.70710677+0.70710677j,  0.70710677-0.70710677j,
-//        -0.70710677+0.70710677j,  0.70710677+0.70710677j,
-//        -0.70710677-0.70710677j,  0.70710677+0.70710677j,
-//        -0.70710677-0.70710677j,  0.70710677+0.70710677j,
-//        -0.70710677-0.70710677j,  0.70710677+0.70710677j,
-//         0.70710677-0.70710677j,  0.70710677-0.70710677j,
-//         0.70710677+0.70710677j, -0.70710677+0.70710677j,
-//        -0.70710677+0.70710677j, -0.70710677-0.70710677j,
-//         0.70710677+0.70710677j, -0.70710677-0.70710677j,
-//        -0.70710677-0.70710677j, -0.70710677+0.70710677j,
-//        -0.70710677+0.70710677j,  0.70710677+0.70710677j,
-//         0.70710677-0.70710677j, -0.70710677-0.70710677j};
-//
-//    const gr_complex synchronizer_v4_impl::preSyms_x2_fliplr_conj[96] =
-//        {-0.05751960-1.06877923j,  0.70710665-0.70710665j,
-//			0.96787697+0.31263849j,  0.70710683+0.70710689j,
-//			0.04994498+0.02322075j, -0.70710677-0.70710677j,
-//		   -1.00477576-0.77428943j, -0.70710683-0.70710677j,
-//		   -0.45783547-0.87726957j, -0.70710671-0.70710683j,
-//		   -0.95984519+0.06683378j, -0.70710677+0.70710671j,
-//		   -0.42076343+0.74770236j, -0.70710671+0.70710665j,
-//		   -1.08900166+0.88655835j, -0.70710683+0.70710677j,
-//			0.21010289-0.073215j  ,  0.70710683-0.70710671j,
-//			0.64430445-0.73423678j,  0.70710671-0.70710665j,
-//			0.97398925-0.92401201j,  0.70710683-0.70710677j,
-//		   -0.20128489+0.18980072j, -0.70710671+0.70710677j,
-//		   -0.11851995+0.08858704j,  0.70710665-0.70710677j,
-//			0.46924281-0.38897231j, -0.70710671+0.70710677j,
-//		   -1.37390292+1.22124052j, -0.70710677+0.70710677j,
-//			0.43081510-0.13785198j,  0.70710677-0.70710671j,
-//			0.00463670-0.91634619j, -0.70710677-0.70710683j,
-//		   -0.83524835-0.04208908j, -0.70710671+0.70710653j,
-//		   -0.70443785+1.00534058j, -0.70710683+0.70710683j,
-//		   -0.62667698+0.03305677j, -0.70710677-0.70710677j,
-//		   -0.90893525-1.08450902j, -0.70710671-0.70710683j,
-//			0.04223688+0.18974672j,  0.70710665+0.70710671j,
-//			0.81873888+0.25460532j,  0.70710665-0.70710671j,
-//			0.73506474-1.18435335j,  0.70710683-0.70710671j,
-//			0.56178945+0.24885255j,  0.70710671+0.70710671j,
-//			1.03661072+0.15496387j,  0.70710683-0.70710671j,
-//		   -0.30967343-0.56743401j, -0.70710683+0.70710677j,
-//			0.08827468+1.53255141j,  0.70710671+0.70710671j,
-//			0.05508756-0.6689443j , -0.70710671-0.70710671j,
-//		   -0.17450830+0.38476533j,  0.70710677+0.70710677j,
-//			0.28946680-0.20185675j, -0.70710677-0.70710683j,
-//		   -0.41400599+0.04977918j,  0.70710689+0.70710671j,
-//			0.56852669+0.10137521j, -0.70710677-0.70710677j,
-//		   -0.80945057-0.28088036j,  0.70710671+0.70710671j,
-//			1.56957042+0.55650836j,  0.70710683-0.70710671j,
-//		   -0.03159594-1.3975693j ,  0.70710683-0.70710671j,
-//			1.46415174+0.35750556j,  0.70710665+0.70710683j,
-//		   -0.53795636+0.5759654j , -0.70710671+0.70710671j,
-//		   -0.34947091+0.99419743j, -0.70710677+0.70710677j,
-//		   -1.24164104-0.18950649j, -0.70710683-0.70710689j,
-//			0.43727133-0.15147361j,  0.70710665+0.70710689j,
-//		   -0.04705258+0.51324481j, -0.70710671-0.70710677j,
-//		   -0.77846509-1.41305459j, -0.70710677-0.70710677j,
-//		   -0.73197603+0.41725174j, -0.70710683+0.70710677j,
-//		   -0.69809616+0.48355645j, -0.70710671+0.70710677j,
-//		   -0.27108425+1.10157359j,  0.70710665+0.70710677j,
-//			1.29566348-0.25711846j,  0.70710683-0.70710683j,
-//		   -0.38806984-0.5718742j , -0.70710683-0.70710677j};
 
     synchronizer_v4::sptr
     synchronizer_v4::make(double Fs, int sps, std::vector<unsigned char> preamble_bits, std::vector<int> sym_mapping)
@@ -130,14 +53,12 @@ namespace gr {
       : gr::sync_block("synchronizer_v4",
               gr::io_signature::make(0, 0, 0),
               gr::io_signature::make(0, 0, 0)),
-              preFFTEngine(128),					// TODO: the size of the FFT shouldn't be hardcoded here
-              preIFFTEngine(128),					// TODO: the size of the IFFT shouldn't be hardcoded here
-              wOpt_gr(48),							// TODO: the size of the filter shouldn't be hardcoded here
-              preSymsSize(preamble_bits.size()/2),					// divide by 2 b/c of qpsk
+              optimalFilterSize(48),			// TODO: the size of the optimal filter should be based on preamble size ... currently hardcoded to 48 taps
+              preSymsSize(preamble_bits.size()/2),												// divide by 2 b/c this is QPSK specific, 2 bits/sym
               preSymsRateMatchedSize(preSymsSize*sps),
-              preSyms_fliplr_conj(preSymsSize),
-              preSyms_x2_fliplr_conj(preSymsRateMatchedSize),
-              d_const(mapper::QPSK, sym_mapping, gr_complex(1,0))
+              d_const(mapper::QPSK, sym_mapping, gr_complex(1,0)),
+              preFFTEngineFFTSize( (int)pow(2,ceil(log2(preamble_bits.size()/2 * sps))) ),		// 2^nextpow2(preSymsRateMatchedSize)
+              preFFTEngine(preFFTEngineFFTSize)												// initialize the FFT engine to the FFT Size
     {
     	message_port_register_in(pmt::mp("cpdus"));
 		message_port_register_out(pmt::mp("cpdus"));
@@ -148,51 +69,36 @@ namespace gr {
     	d_Fs = Fs;
     	d_sps = sps;
 
-    	preFFTEngineFFTSize = 128;					// TODO: again, remove the hardcoded number
-
-    	wOpt = gsl_vector_complex_alloc(48);		// TODO: the optimal filter size should be dependent upon
-    												// the preamble length, right now it is hard-coded
+        preSyms_fliplr_conj.resize(preSymsSize);
+        preSyms_xR_fliplr_conj.resize(preSymsRateMatchedSize);
+        wOpt_gr.resize(optimalFilterSize);
+    	wOpt = gsl_vector_complex_alloc(optimalFilterSize);
 
     	// map the preamble bits to symbols, both x1 and x2 ... and flip both vectors for correlation purposes
     	d_const.map(&preamble_bits[0], &preSyms_fliplr_conj[0], preSymsSize, 0);		// after this operation, we are still not flipped and conjugated yet
-    	// interpolate the preamble syms by 2
-//    	// generate the filter taps
-//    	std::vector<float> taps = gr::filter::firdes::low_pass(1,1,0.5,0.4);
-//    	std::vector<gr_complex> ctaps(taps.size(), gr_complex(0,0));
-//    	for(int ii=0; ii<ctaps.size(); ii++) {
-//    		ctaps[ii].real() = taps[ii];
-//    		ctaps[ii].imag() = 0;
-//    	}
     	// upsample
-    	int jj = 0;
-    	for(int ii=0; ii<preSymsRateMatchedSize; ii++) {
-    		if(ii%2==0) {
-    			preSyms_x2_fliplr_conj[ii].real() = 0;
-    			preSyms_x2_fliplr_conj[ii].imag() = 0;
-    		}
-    		else {
-    			preSyms_x2_fliplr_conj[ii].real() = preSyms_fliplr_conj[jj].real();
-				preSyms_x2_fliplr_conj[ii].imag() = preSyms_fliplr_conj[jj].imag();
-    		}
-    	}
-    	// filter
-//    	conv(&ctaps[0], ctaps.size(), &preSyms_x2_fliplr_conj[0], preSyms_x2_fliplr_conj.size(), std::vector<gr_complex> &result)
-
-    	std::reverse(preSyms_fliplr_conj.begin(),preSyms_fliplr_conj.end());			// flip the x1 preamble symbols
-    	std::reverse(preSyms_x2_fliplr_conj.begin(),preSyms_x2_fliplr_conj.end());		// flip the x2 preamble symbols
-
-    	conjugate(&preSyms_fliplr_conj[0], &preSyms_fliplr_conj[0], preSyms_fliplr_conj.size());				// conjugate the x1 preamble symbols
-    	conjugate(&preSyms_x2_fliplr_conj[0], &preSyms_x2_fliplr_conj[0], preSyms_x2_fliplr_conj.size());       // conjugate the x2 preamble symbols
-
-    	if(1) {
-			std::string filename = "/tmp/preSyms_fliplr_conj.txt";
-			qa_helpers::writeComplexFile(filename, preSyms_fliplr_conj);
-
-			filename = "/tmp/preSyms_x2_fliplr_conj.txt";
-			qa_helpers::writeComplexFile(filename, preSyms_x2_fliplr_conj);
-
-			throw std::exception();
+		int jj = 0;
+		for(int ii=0; ii<preSymsRateMatchedSize; ii++) {
+			if(ii%sps==1) {
+				preSyms_xR_fliplr_conj[ii].real() = 0;
+				preSyms_xR_fliplr_conj[ii].imag() = 0;
+			}
+			else {
+				preSyms_xR_fliplr_conj[ii].real() = preSyms_fliplr_conj[jj].real();
+				preSyms_xR_fliplr_conj[ii].imag() = preSyms_fliplr_conj[jj].imag();
+				jj++;
+			}
 		}
+		// TODO: currently the rate matched preamble correlation is not interpolated, just upsampled
+		// this seems to work great, but perhaps it is worth doing filtering as well to see if better
+		// results can be achieved.  Theoretically, we should get stronger correlation peaks if it is
+		// interpolated b/c the intermediary samples would contribute to the correlations strength as well
+
+		std::reverse(preSyms_fliplr_conj.begin(),preSyms_fliplr_conj.end());			// flip the x1 preamble symbols
+    	std::reverse(preSyms_xR_fliplr_conj.begin(),preSyms_xR_fliplr_conj.end());		// flip the x2 preamble symbols
+
+    	volk_32fc_conjugate_32fc(&preSyms_fliplr_conj[0], &preSyms_fliplr_conj[0], preSyms_fliplr_conj.size());				// conjugate the x1 preamble symbols
+    	volk_32fc_conjugate_32fc(&preSyms_xR_fliplr_conj[0], &preSyms_xR_fliplr_conj[0], preSyms_xR_fliplr_conj.size());	// conjugate the x2 preamble symbols
 
     	debugMode = false;
     }
@@ -209,14 +115,7 @@ namespace gr {
     	debugMode = true;
     }
 
-    void synchronizer_v4_impl::conjugate(gr_complex* in, gr_complex* out, int len) {
-    	for(int ii=0; ii<len; ii++) {
-    		out[ii].real() = in[ii].real();
-    		out[ii].imag() = -1*in[ii].imag();
-    	}
-    }
-
-    void synchronizer_v4_impl::qpskBurstCFOCorrect(gr_complex* x_in, int burstSize) {
+    float synchronizer_v4_impl::qpskBurstCFOCorrect(gr_complex* x_in, int burstSize) {
 		// TODO: maybe we can have a fixed burst size, only calculate cfo over a certain burst size
 		// then we can statically create the fft engine in the constructor, will probably be a lot faster
 		if(burstSize%2!=0) {
@@ -227,7 +126,7 @@ namespace gr {
 		gr_complex* fftOutBuf = fftEngine.get_outbuf();
 		std::vector<float> fftOutAbs(burstSize, 0.0);
 		// fill the FFT buffer
-		volk_32fc_s32f_power_32fc(fftInBuf, x_in, 4, burstSize);
+		volk_32fc_s32f_power_32fc(fftInBuf, x_in, 4, burstSize);		// compute signal^4 FFT (b/c this is QPSK specific)
 
 		if(debugMode) {
 			std::string filename = "/tmp/gr_cfoFFTInput.txt";
@@ -272,6 +171,8 @@ namespace gr {
 
 		// correct for cfo
 		shiftFreq(&x_in[0], burstSize, d_Fs, cfoEstimate, 0);
+
+        return cfoEstimate;
 	}
 
     void synchronizer_v4_impl::shiftFreq(gr_complex* buf, int bufLen, double Fs, double freq, double tStart) {
@@ -314,21 +215,21 @@ namespace gr {
     void synchronizer_v4_impl::determineOptimalFilter(gsl_vector_complex* w, gr_complex* x, int xLen) {
     	gr_complex* fftInBuf = preFFTEngine.get_inbuf();
     	// fill the fft input buffer
-    	memcpy(&fftInBuf[0], &x[0], 48*sizeof(gr_complex));
-    	memset(&fftInBuf[48], 0, 80*sizeof(gr_complex));
+    	memcpy(&fftInBuf[0], &x[0], optimalFilterSize*sizeof(gr_complex));
+    	memset(&fftInBuf[optimalFilterSize], 0, (preFFTEngineFFTSize-optimalFilterSize)*sizeof(gr_complex));
 
     	preFFTEngine.execute();
     	gr_complex* fftOutBuf = preFFTEngine.get_outbuf();
 
     	if(debugMode) {
 			std::string filename = "/tmp/gr_dofFFTOutput.txt";
-			std::vector<gr_complex> b(128);
-			b.assign(fftOutBuf, fftOutBuf+128);
+			std::vector<gr_complex> b(preFFTEngineFFTSize);
+			b.assign(fftOutBuf, fftOutBuf+preFFTEngineFFTSize);
 			qa_helpers::writeComplexFile(filename, b);
 		}
 
     	// take the output, and store the absolute value in an array
-    	gr_complex* ifftInBuf = preIFFTEngine.get_inbuf();
+    	gr_complex* ifftInBuf = preFFTEngine.get_inbuf();
     	for(int ii=0; ii<preFFTEngineFFTSize; ii++) {
     		ifftInBuf[ii].real() = pow( std::abs(fftOutBuf[ii]), 2);
     		ifftInBuf[ii].imag() = 0;
@@ -336,20 +237,20 @@ namespace gr {
 
     	if(debugMode) {
 			std::string filename = "/tmp/gr_dofIFFTInput.txt";
-			std::vector<float> b(128);
-			for(int ii=0; ii<128; ii++) {
+			std::vector<float> b(preFFTEngineFFTSize);
+			for(int ii=0; ii<preFFTEngineFFTSize; ii++) {
 				b[ii] = ifftInBuf[ii].real();
 			}
 			qa_helpers::writeFloatFile(filename, b);
 		}
 
-    	preIFFTEngine.execute();
-    	gr_complex* ifftOutBuf = preIFFTEngine.get_outbuf();
+    	preFFTEngine.execute();
+    	gr_complex* ifftOutBuf = preFFTEngine.get_outbuf();
 
     	if(debugMode) {
 			std::string filename = "/tmp/gr_dofIFFTOutput.txt";
-			std::vector<gr_complex> b(128);
-			b.assign(ifftOutBuf, ifftOutBuf+128);
+			std::vector<gr_complex> b(preFFTEngineFFTSize);
+			b.assign(ifftOutBuf, ifftOutBuf+preFFTEngineFFTSize);
 			qa_helpers::writeComplexFile(filename, b);
 		}
 
@@ -359,8 +260,8 @@ namespace gr {
 		std::vector<gr_complex> col(preSymsSize);
     	for(int ii=0; ii<preSymsSize; ii++) {
     		// downscale by m and the ifft size
-    		col[ii] = std::conj(ifftOutBuf[ii])*1.0f/(48.0f*128.0f);
-    		row[ii] = ifftOutBuf[ii]*1.0f/(48.0f*128.0f);
+    		col[ii] = std::conj(ifftOutBuf[ii])*1.0f/(((float)(optimalFilterSize))*((float)(preFFTEngineFFTSize)));
+    		row[ii] = ifftOutBuf[ii]*1.0f/(((float)(optimalFilterSize))*((float)(preFFTEngineFFTSize)));
     	}
 
     	if(debugMode) {
@@ -373,22 +274,20 @@ namespace gr {
     	gsl_matrix_complex* R = gsl_matrix_complex_alloc(preSymsSize, preSymsSize);
     	toeplitz(&col[0], preSymsSize, &row[0], preSymsSize, R);
 
-    	std::vector<gr_complex> xc(95);
+    	std::vector<gr_complex> xc(preSymsSize+preSymsSize-1);
     	// compute correlation between preSyms and x[1:48]
-    	std::vector<gr_complex> x_in(144, gr_complex(0,0));
-    	memcpy(&x_in[0], &x[0], sizeof(gr_complex)*48);
     	// the difference in the cross-correlations between the zero-pad and the non-zeropad are small,
     	// not sure if we can get away w/ doing no zeropad?? investigate w/ perofrmacne
-    	conv(&x[0], 48, &preSyms_fliplr_conj[0], 48, xc);
+    	conv(&x[0], preSymsSize, &preSyms_fliplr_conj[0], preSymsSize, xc);
 
     	if(debugMode) {
 			std::string filename = "/tmp/gr_dofxc.txt";
 			qa_helpers::writeComplexFile(filename, xc);
 
 			// do this to make sure we load P properly as debugging measure
-			std::vector<gr_complex> P(48);
+			std::vector<gr_complex> P(optimalFilterSize);
 			int jj = xc.size()-1;
-			for(int ii=0; ii<48; ii++) {
+			for(int ii=0; ii<optimalFilterSize; ii++) {
 				P[ii] = gr_complex(xc[jj].real(), -xc[jj].imag() );
 				jj--;
 			}
@@ -397,10 +296,10 @@ namespace gr {
 		}
 
     	// make P vector
-        gsl_vector_complex* P = gsl_vector_complex_alloc(48);
+        gsl_vector_complex* P = gsl_vector_complex_alloc(optimalFilterSize);
     	gsl_complex cval;
     	int jj = xc.size()-1;
-    	for(int ii=0; ii<48; ii++) {
+    	for(int ii=0; ii<optimalFilterSize; ii++) {
     		GSL_SET_COMPLEX(&cval, xc[jj].real(), -xc[jj].imag());
     		gsl_vector_complex_set(P, ii, cval);
     		jj--;
@@ -408,9 +307,10 @@ namespace gr {
 
     	// solve for R
     	int s;
-    	gsl_permutation * p = gsl_permutation_alloc(48);
+    	gsl_permutation * p = gsl_permutation_alloc(optimalFilterSize);
     
         // sizes ...
+    	// if optimalFilterSize = 48 ... the sizes below are shown as such for readability
         // R = [ 48x48 ]
         // p = [ 48x1 ]
         // s = [ 1x1 ]
@@ -492,7 +392,7 @@ namespace gr {
 		}
 
 		// perform cfo correction
-		qpskBurstCFOCorrect(&eqBurst[0], eqBurst.size());
+		float cfo = qpskBurstCFOCorrect(&eqBurst[0], eqBurst.size());
 
 		if(debugMode) {
 			std::string filename = "/tmp/gr_burstCFOCorrected.txt";
@@ -501,14 +401,12 @@ namespace gr {
 
 
         // publish debug port #1
-        if(1){
-            pmt::pmt_t cfo_vec = pmt::init_c32vector(eqBurst.size(), &eqBurst[0]);
-            message_port_pub(pmt::mp("debug_post_cfo"), pmt::cons( meta, cfo_vec ) );
-        }
+		pmt::pmt_t cfo_vec = pmt::init_c32vector(eqBurst.size(), &eqBurst[0]);
+		message_port_pub(pmt::mp("debug_post_cfo"), pmt::cons( meta, cfo_vec ) );
 
         // search for start index/timing
-		std::vector<gr_complex> preCrossCorr_cmplx(96+eqBurst.size()-1);
-		conv(&eqBurst[0], eqBurst.size(), &preSyms_x2_fliplr_conj[0], 96, preCrossCorr_cmplx);
+		std::vector<gr_complex> preCrossCorr_cmplx(preSymsRateMatchedSize+eqBurst.size()-1);
+		conv(&eqBurst[0], eqBurst.size(), &preSyms_xR_fliplr_conj[0], preSymsRateMatchedSize, preCrossCorr_cmplx);
 
 		std::vector<float> preCrossCorr(preCrossCorr_cmplx.size());
 		int maxIdx = 0;
@@ -521,7 +419,7 @@ namespace gr {
 			}
 		}
 
-		int preambleIdxStart = maxIdx - 96 + 1;
+		int preambleIdxStart = maxIdx - preSymsRateMatchedSize + 1;
 		if(debugMode) {
 			std::string f1 = "/tmp/gr_preCrossCorr.txt";
 			qa_helpers::writeFloatFile(f1, preCrossCorr);
@@ -533,10 +431,8 @@ namespace gr {
 		}
 
         // publish debug port #2
-        if(1){
-            pmt::pmt_t xcorr_vec = pmt::init_f32vector(preCrossCorr.size(), &preCrossCorr[0]);
-            message_port_pub(pmt::mp("debug_pre_xcorr"), pmt::cons( meta, xcorr_vec ) );
-        }
+		pmt::pmt_t xcorr_vec = pmt::init_f32vector(preCrossCorr.size(), &preCrossCorr[0]);
+		message_port_pub(pmt::mp("debug_pre_xcorr"), pmt::cons( meta, xcorr_vec ) );
 
 		if(preambleIdxStart<0) {
 			// means we didn't find the preamble, quit
@@ -555,14 +451,13 @@ namespace gr {
 			qa_helpers::writeComplexFile(filename, eqIn_decimated);
 		}
 
-//		gsl_vector_complex* wOpt = gsl_vector_complex_alloc(48);
 		determineOptimalFilter(wOpt, &eqIn_decimated[0], eqIn_decimated.size());
 
 		// filter
-		std::vector<gr_complex> whFilt(eqIn_decimated.size()+48-1);
+		std::vector<gr_complex> whFilt(eqIn_decimated.size()+optimalFilterSize-1);
 		float maxWopt = -999999;
 		float tmp;
-		for(int ii=0; ii<48; ii++) {
+		for(int ii=0; ii<optimalFilterSize; ii++) {
 			gsl_complex c = gsl_vector_complex_get(wOpt, ii);
 			wOpt_gr[ii] = gr_complex(GSL_REAL(c), GSL_IMAG(c));
 			tmp = std::abs(wOpt_gr[ii]);
@@ -570,7 +465,6 @@ namespace gr {
 				maxWopt = tmp;
 			}
 		}
-//		gsl_vector_complex_free(wOpt);
 
 		if(debugMode) {
 			std::string filename = "/tmp/gr_wOpt.txt";
@@ -588,7 +482,6 @@ namespace gr {
 			std::string filename3 = "/tmp/gr_whFilt.txt";
 			qa_helpers::writeComplexFile(filename3, whFilt);
 		}
-
 
 		// normalize
 		std::vector<float> whFiltAbs(whFilt.size());
@@ -616,8 +509,10 @@ namespace gr {
 		}
 
 		// put into new pdu and send
-        int offset = (96)/2-1;
+        int offset = (preSymsRateMatchedSize)/2-1;
 		pmt::pmt_t newvec = pmt::init_c32vector(phRecoveredSyms.size()-offset, &phRecoveredSyms[offset]);
+        meta = pmt::dict_add(meta, pmt::mp("cfo"), pmt::mp(cfo));
+        meta = pmt::dict_add(meta, pmt::mp("sync_delay"), pmt::mp(preambleIdxStart));
 		msg = pmt::cons( meta, newvec );
 		message_port_pub(pmt::mp("cpdus"), msg);
 	}

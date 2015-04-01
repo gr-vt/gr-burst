@@ -21,6 +21,7 @@
 #ifndef INCLUDED_BURST_SYNCHRONIZER_V4_IMPL_H
 #define INCLUDED_BURST_SYNCHRONIZER_V4_IMPL_H
 
+#include <gnuradio/fft/fft.h>
 #include <burst/synchronizer_v4.h>
 #include <gsl/gsl_blas.h>
 #include <gsl/gsl_complex_math.h>
@@ -28,7 +29,6 @@
 #include <gsl/gsl_vector_complex_double.h>
 #include <gsl/gsl_linalg.h>
 #include <gnuradio/filter/fft_filter.h>
-
 #include <mapper/constellation.h>
 
 namespace gr {
@@ -37,13 +37,12 @@ namespace gr {
     class synchronizer_v4_impl : public synchronizer_v4
     {
      private:
-      void qpskBurstCFOCorrect(gr_complex* x, int burstSize);
+      float qpskBurstCFOCorrect(gr_complex* x, int burstSize);
       void shiftFreq(gr_complex* buf, int bufLen, double Fs, double freq, double tStart);
       void determineOptimalFilter(gsl_vector_complex* w, gr_complex* x, int xLen);
       void qpskFirstOrderPLL(gr_complex* x, int size, float alpha, gr_complex* y);
       void toeplitz(gr_complex* col, int M, gr_complex* row, int N, gsl_matrix_complex* T);
       void conv(gr_complex* a, int aLen, const gr_complex* b, int bLen, std::vector<gr_complex> &result);
-      void conjugate(gr_complex* in, gr_complex* out, int len);
       void handler(pmt::pmt_t msg);
 
       void enableDebugMode();
@@ -62,20 +61,21 @@ namespace gr {
 
       int preFFTEngineFFTSize;
       fft::fft_complex preFFTEngine;
-      fft::fft_complex preIFFTEngine;
 
       std::vector<gr_complex> preSyms_fliplr_conj;			// preamble bits size / 2
-      std::vector<gr_complex> preSyms_x2_fliplr_conj;		// ( preamble bits size / 2 )* sps
+      std::vector<gr_complex> preSyms_xR_fliplr_conj;		// ( preamble bits size / 2 )* sps
 
+      int optimalFilterSize;
       std::vector<gr_complex> wOpt_gr;
       gsl_vector_complex* wOpt;
 
       int preSymsSize;
       int preSymsRateMatchedSize;
 
+      mapper::constellation d_const;
+
       bool debugMode;
 
-      mapper::constellation d_const;
     };
 
   } // namespace burst
