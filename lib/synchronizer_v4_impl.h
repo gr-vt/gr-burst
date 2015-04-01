@@ -21,6 +21,7 @@
 #ifndef INCLUDED_BURST_SYNCHRONIZER_V4_IMPL_H
 #define INCLUDED_BURST_SYNCHRONIZER_V4_IMPL_H
 
+#include <gnuradio/fft/fft.h>
 #include <burst/synchronizer_v4.h>
 #include <gsl/gsl_blas.h>
 #include <gsl/gsl_complex_math.h>
@@ -42,7 +43,6 @@ namespace gr {
       void qpskFirstOrderPLL(gr_complex* x, int size, float alpha, gr_complex* y);
       void toeplitz(gr_complex* col, int M, gr_complex* row, int N, gsl_matrix_complex* T);
       void conv(gr_complex* a, int aLen, const gr_complex* b, int bLen, std::vector<gr_complex> &result);
-      void conjugate(gr_complex* in, gr_complex* out, int len);
       void handler(pmt::pmt_t msg);
 
       void enableDebugMode();
@@ -61,7 +61,6 @@ namespace gr {
 
       int preFFTEngineFFTSize;
       fft::fft_complex preFFTEngine;
-      fft::fft_complex preIFFTEngine;
 
       std::vector<gr_complex> preSyms_fliplr_conj;			// preamble bits size / 2
       std::vector<gr_complex> preSyms_xR_fliplr_conj;		// ( preamble bits size / 2 )* sps

@@ -53,12 +53,11 @@ namespace gr {
               gr::io_signature::make(0, 0, 0),
               gr::io_signature::make(0, 0, 0)),
               optimalFilterSize(48),			// TODO: the size of the optimal filter should be based on preamble size ... currently hardcoded to 48 taps
-              preSymsSize(preamble_bits.size()/2),				// divide by 2 b/c this is QPSK specific, 2 bits/sym
+              preSymsSize(preamble_bits.size()/2),												// divide by 2 b/c this is QPSK specific, 2 bits/sym
               preSymsRateMatchedSize(preSymsSize*sps),
               d_const(mapper::QPSK, sym_mapping, gr_complex(1,0)),
-              preFFTEngineFFTSize(128),							// setup the FFT/IFFT engine sizes, TODO: should be 2^nextpow2(preSymsRateMatchedSize)
-              preFFTEngine(preFFTEngineFFTSize),				// initialize the FFT engine to the FFT Size
-              preIFFTEngine(preFFTEngineFFTSize)				// initialize the IFFT engine to the appropriate size
+              preFFTEngineFFTSize( (int)pow(2,ceil(log2(preamble_bits.size()/2 * sps))) ),		// 2^nextpow2(preSymsRateMatchedSize)
+              preFFTEngine(preFFTEngineFFTSize)												// initialize the FFT engine to the FFT Size
     {
     	message_port_register_in(pmt::mp("cpdus"));
 		message_port_register_out(pmt::mp("cpdus"));
@@ -94,8 +93,8 @@ namespace gr {
 		std::reverse(preSyms_fliplr_conj.begin(),preSyms_fliplr_conj.end());			// flip the x1 preamble symbols
     	std::reverse(preSyms_xR_fliplr_conj.begin(),preSyms_xR_fliplr_conj.end());		// flip the x2 preamble symbols
 
-		conjugate(&preSyms_fliplr_conj[0], &preSyms_fliplr_conj[0], preSyms_fliplr_conj.size());				// conjugate the x1 preamble symbols
-		conjugate(&preSyms_xR_fliplr_conj[0], &preSyms_xR_fliplr_conj[0], preSyms_xR_fliplr_conj.size());       // conjugate the x2 preamble symbols
+    	volk_32fc_conjugate_32fc(&preSyms_fliplr_conj[0], &preSyms_fliplr_conj[0], preSyms_fliplr_conj.size());				// conjugate the x1 preamble symbols
+    	volk_32fc_conjugate_32fc(&preSyms_xR_fliplr_conj[0], &preSyms_xR_fliplr_conj[0], preSyms_xR_fliplr_conj.size());	// conjugate the x2 preamble symbols
 
     	debugMode = false;
     }
@@ -106,19 +105,11 @@ namespace gr {
     synchronizer_v4_impl::~synchronizer_v4_impl()
     {
     	gsl_vector_complex_free(wOpt);
-    	// TODO: does the FFT engine destruct itself, or do we need to destroy it?
     }
 
     void synchronizer_v4_impl::enableDebugMode() {
     	debugMode = true;
     }
-
-    void synchronizer_v4_impl::conjugate(gr_complex* in, gr_complex* out, int len) {
-		for(int ii=0; ii<len; ii++) {
-			out[ii].real() = in[ii].real();
-			out[ii].imag() = -1*in[ii].imag();
-		}
-	}
 
     float synchronizer_v4_impl::qpskBurstCFOCorrect(gr_complex* x_in, int burstSize) {
 		// TODO: maybe we can have a fixed burst size, only calculate cfo over a certain burst size
@@ -234,7 +225,7 @@ namespace gr {
 		}
 
     	// take the output, and store the absolute value in an array
-    	gr_complex* ifftInBuf = preIFFTEngine.get_inbuf();
+    	gr_complex* ifftInBuf = preFFTEngine.get_inbuf();
     	for(int ii=0; ii<preFFTEngineFFTSize; ii++) {
     		ifftInBuf[ii].real() = pow( std::abs(fftOutBuf[ii]), 2);
     		ifftInBuf[ii].imag() = 0;
@@ -249,8 +240,8 @@ namespace gr {
 			qa_helpers::writeFloatFile(filename, b);
 		}
 
-    	preIFFTEngine.execute();
-    	gr_complex* ifftOutBuf = preIFFTEngine.get_outbuf();
+    	preFFTEngine.execute();
+    	gr_complex* ifftOutBuf = preFFTEngine.get_outbuf();
 
     	if(debugMode) {
 			std::string filename = "/tmp/gr_dofIFFTOutput.txt";
