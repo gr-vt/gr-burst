@@ -97,6 +97,8 @@ class deframer(gr.sync_block):
         meta = pmt.dict_add(meta, pmt.intern("npkt"), pmt.from_long(self.npkt));
         meta = pmt.dict_add(meta, pmt.intern("npkt_hok"), pmt.from_long(self.npkt_hok));
         meta = pmt.dict_add(meta, pmt.intern("npkt_ok"), pmt.from_long(self.npkt_ok));
+        meta = pmt.dict_add(meta, pmt.intern("header_pass_rate"), pmt.from_double(pct_hok));
+        meta = pmt.dict_add(meta, pmt.intern("payload_pass_rate"), pmt.from_double(pct_ok));
         pdu = pmt.cons( meta, v )
         self.message_port_pub(pmt.intern("pdus"), pdu);
 
