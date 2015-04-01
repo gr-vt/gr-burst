@@ -33,99 +33,31 @@
 #include <volk/volk_typedefs.h>
 #include <volk/volk.h>
 
+#include <algorithm>    // std::reverse
+
 namespace gr {
   namespace burst {
 
-    const gr_complex synchronizer_v4_impl::preSyms_fliplr_conj[48] =
-        {0.70710677-0.70710677j,  0.70710677+0.70710677j,
-        -0.70710677-0.70710677j, -0.70710677-0.70710677j,
-        -0.70710677-0.70710677j, -0.70710677+0.70710677j,
-        -0.70710677+0.70710677j, -0.70710677+0.70710677j,
-         0.70710677-0.70710677j,  0.70710677-0.70710677j,
-         0.70710677-0.70710677j, -0.70710677+0.70710677j,
-         0.70710677-0.70710677j, -0.70710677+0.70710677j,
-        -0.70710677+0.70710677j,  0.70710677-0.70710677j,
-        -0.70710677-0.70710677j, -0.70710677+0.70710677j,
-        -0.70710677+0.70710677j, -0.70710677-0.70710677j,
-        -0.70710677-0.70710677j,  0.70710677+0.70710677j,
-         0.70710677-0.70710677j,  0.70710677-0.70710677j,
-         0.70710677+0.70710677j,  0.70710677-0.70710677j,
-        -0.70710677+0.70710677j,  0.70710677+0.70710677j,
-        -0.70710677-0.70710677j,  0.70710677+0.70710677j,
-        -0.70710677-0.70710677j,  0.70710677+0.70710677j,
-        -0.70710677-0.70710677j,  0.70710677+0.70710677j,
-         0.70710677-0.70710677j,  0.70710677-0.70710677j,
-         0.70710677+0.70710677j, -0.70710677+0.70710677j,
-        -0.70710677+0.70710677j, -0.70710677-0.70710677j,
-         0.70710677+0.70710677j, -0.70710677-0.70710677j,
-        -0.70710677-0.70710677j, -0.70710677+0.70710677j,
-        -0.70710677+0.70710677j,  0.70710677+0.70710677j,
-         0.70710677-0.70710677j, -0.70710677-0.70710677j};
-
-    const gr_complex synchronizer_v4_impl::preSyms_x2_fliplr_conj[96] =
-        {-0.05751960-1.06877923j,  0.70710665-0.70710665j,
-			0.96787697+0.31263849j,  0.70710683+0.70710689j,
-			0.04994498+0.02322075j, -0.70710677-0.70710677j,
-		   -1.00477576-0.77428943j, -0.70710683-0.70710677j,
-		   -0.45783547-0.87726957j, -0.70710671-0.70710683j,
-		   -0.95984519+0.06683378j, -0.70710677+0.70710671j,
-		   -0.42076343+0.74770236j, -0.70710671+0.70710665j,
-		   -1.08900166+0.88655835j, -0.70710683+0.70710677j,
-			0.21010289-0.073215j  ,  0.70710683-0.70710671j,
-			0.64430445-0.73423678j,  0.70710671-0.70710665j,
-			0.97398925-0.92401201j,  0.70710683-0.70710677j,
-		   -0.20128489+0.18980072j, -0.70710671+0.70710677j,
-		   -0.11851995+0.08858704j,  0.70710665-0.70710677j,
-			0.46924281-0.38897231j, -0.70710671+0.70710677j,
-		   -1.37390292+1.22124052j, -0.70710677+0.70710677j,
-			0.43081510-0.13785198j,  0.70710677-0.70710671j,
-			0.00463670-0.91634619j, -0.70710677-0.70710683j,
-		   -0.83524835-0.04208908j, -0.70710671+0.70710653j,
-		   -0.70443785+1.00534058j, -0.70710683+0.70710683j,
-		   -0.62667698+0.03305677j, -0.70710677-0.70710677j,
-		   -0.90893525-1.08450902j, -0.70710671-0.70710683j,
-			0.04223688+0.18974672j,  0.70710665+0.70710671j,
-			0.81873888+0.25460532j,  0.70710665-0.70710671j,
-			0.73506474-1.18435335j,  0.70710683-0.70710671j,
-			0.56178945+0.24885255j,  0.70710671+0.70710671j,
-			1.03661072+0.15496387j,  0.70710683-0.70710671j,
-		   -0.30967343-0.56743401j, -0.70710683+0.70710677j,
-			0.08827468+1.53255141j,  0.70710671+0.70710671j,
-			0.05508756-0.6689443j , -0.70710671-0.70710671j,
-		   -0.17450830+0.38476533j,  0.70710677+0.70710677j,
-			0.28946680-0.20185675j, -0.70710677-0.70710683j,
-		   -0.41400599+0.04977918j,  0.70710689+0.70710671j,
-			0.56852669+0.10137521j, -0.70710677-0.70710677j,
-		   -0.80945057-0.28088036j,  0.70710671+0.70710671j,
-			1.56957042+0.55650836j,  0.70710683-0.70710671j,
-		   -0.03159594-1.3975693j ,  0.70710683-0.70710671j,
-			1.46415174+0.35750556j,  0.70710665+0.70710683j,
-		   -0.53795636+0.5759654j , -0.70710671+0.70710671j,
-		   -0.34947091+0.99419743j, -0.70710677+0.70710677j,
-		   -1.24164104-0.18950649j, -0.70710683-0.70710689j,
-			0.43727133-0.15147361j,  0.70710665+0.70710689j,
-		   -0.04705258+0.51324481j, -0.70710671-0.70710677j,
-		   -0.77846509-1.41305459j, -0.70710677-0.70710677j,
-		   -0.73197603+0.41725174j, -0.70710683+0.70710677j,
-		   -0.69809616+0.48355645j, -0.70710671+0.70710677j,
-		   -0.27108425+1.10157359j,  0.70710665+0.70710677j,
-			1.29566348-0.25711846j,  0.70710683-0.70710683j,
-		   -0.38806984-0.5718742j , -0.70710683-0.70710677j};
-
     synchronizer_v4::sptr
-    synchronizer_v4::make(double Fs, int sps)
+    synchronizer_v4::make(double Fs, int sps, std::vector<unsigned char> preamble_bits, std::vector<int> sym_mapping)
     {
       return gnuradio::get_initial_sptr
-        (new synchronizer_v4_impl(Fs, sps));
+        (new synchronizer_v4_impl(Fs, sps, preamble_bits, sym_mapping));
     }
 
     /*
      * The private constructor
      */
-    synchronizer_v4_impl::synchronizer_v4_impl(double Fs, int sps)
+    synchronizer_v4_impl::synchronizer_v4_impl(double Fs, int sps, std::vector<unsigned char> preamble_bits, std::vector<int> sym_mapping)
       : gr::sync_block("synchronizer_v4",
               gr::io_signature::make(0, 0, 0),
-              gr::io_signature::make(0, 0, 0)), preFFTEngine(128), preIFFTEngine(128), wOpt_gr(48)
+              gr::io_signature::make(0, 0, 0)),
+              preFFTEngine(128),
+              preIFFTEngine(128),
+              wOpt_gr(48),
+              preSymsSize(preamble_bits.size()/2),
+              preSymsRateMatchedSize(preSymsSize*sps),
+              d_const(mapper::QPSK, sym_mapping, gr_complex(1,0))
     {
     	message_port_register_in(pmt::mp("cpdus"));
 		message_port_register_out(pmt::mp("cpdus"));
@@ -133,16 +65,37 @@ namespace gr {
 		message_port_register_out(pmt::mp("debug_pre_xcorr"));
 		set_msg_handler(pmt::mp("cpdus"), boost::bind(&synchronizer_v4_impl::handler, this, _1));
 
-        std::cout << "Fs=" << Fs << " sps = " << sps << "\n"; fflush(stdout);
-
     	d_Fs = Fs;
     	d_sps = sps;
 
-    	preSymsSize = 48;
-    	preSymsX2Size = 96;
     	preFFTEngineFFTSize = 128;
 
+        preSyms_fliplr_conj.resize(preSymsSize);
+        preSyms_x2_fliplr_conj.resize(preSymsRateMatchedSize);
     	wOpt = gsl_vector_complex_alloc(48);
+
+    	// map the preamble bits to symbols, both x1 and x2 ... and flip both vectors for correlation purposes
+    	d_const.map(&preamble_bits[0], &preSyms_fliplr_conj[0], preSymsSize, 0);		// after this operation, we are still not flipped and conjugated yet
+    	// upsample
+		int jj = 0;
+		for(int ii=0; ii<preSymsRateMatchedSize; ii++) {
+			if(ii%2==1) {
+				preSyms_x2_fliplr_conj[ii].real() = 0;
+				preSyms_x2_fliplr_conj[ii].imag() = 0;
+			}
+			else {
+				preSyms_x2_fliplr_conj[ii].real() = preSyms_fliplr_conj[jj].real();
+				preSyms_x2_fliplr_conj[ii].imag() = preSyms_fliplr_conj[jj].imag();
+				jj++;
+			}
+		}
+		// TODO: filter the preSyms_x2_fliplr_conj
+
+		std::reverse(preSyms_fliplr_conj.begin(),preSyms_fliplr_conj.end());			// flip the x1 preamble symbols
+    	std::reverse(preSyms_x2_fliplr_conj.begin(),preSyms_x2_fliplr_conj.end());		// flip the x2 preamble symbols
+
+		conjugate(&preSyms_fliplr_conj[0], &preSyms_fliplr_conj[0], preSyms_fliplr_conj.size());				// conjugate the x1 preamble symbols
+		conjugate(&preSyms_x2_fliplr_conj[0], &preSyms_x2_fliplr_conj[0], preSyms_x2_fliplr_conj.size());       // conjugate the x2 preamble symbols
 
     	debugMode = false;
     }
@@ -158,6 +111,13 @@ namespace gr {
     void synchronizer_v4_impl::enableDebugMode() {
     	debugMode = true;
     }
+
+    void synchronizer_v4_impl::conjugate(gr_complex* in, gr_complex* out, int len) {
+		for(int ii=0; ii<len; ii++) {
+			out[ii].real() = in[ii].real();
+			out[ii].imag() = -1*in[ii].imag();
+		}
+	}
 
     float synchronizer_v4_impl::qpskBurstCFOCorrect(gr_complex* x_in, int burstSize) {
 		// TODO: maybe we can have a fixed burst size, only calculate cfo over a certain burst size
@@ -324,7 +284,7 @@ namespace gr {
     	memcpy(&x_in[0], &x[0], sizeof(gr_complex)*48);
     	// the difference in the cross-correlations between the zero-pad and the non-zeropad are small,
     	// not sure if we can get away w/ doing no zeropad?? investigate w/ perofrmacne
-    	conv(&x[0], 48, preSyms_fliplr_conj, 48, xc);
+    	conv(&x[0], 48, &preSyms_fliplr_conj[0], 48, xc);
 
     	if(debugMode) {
 			std::string filename = "/tmp/gr_dofxc.txt";
@@ -453,7 +413,7 @@ namespace gr {
 
         // search for start index/timing
 		std::vector<gr_complex> preCrossCorr_cmplx(96+eqBurst.size()-1);
-		conv(&eqBurst[0], eqBurst.size(), preSyms_x2_fliplr_conj, 96, preCrossCorr_cmplx);
+		conv(&eqBurst[0], eqBurst.size(), &preSyms_x2_fliplr_conj[0], 96, preCrossCorr_cmplx);
 
 		std::vector<float> preCrossCorr(preCrossCorr_cmplx.size());
 		int maxIdx = 0;
@@ -500,7 +460,6 @@ namespace gr {
 			qa_helpers::writeComplexFile(filename, eqIn_decimated);
 		}
 
-//		gsl_vector_complex* wOpt = gsl_vector_complex_alloc(48);
 		determineOptimalFilter(wOpt, &eqIn_decimated[0], eqIn_decimated.size());
 
 		// filter
@@ -515,7 +474,6 @@ namespace gr {
 				maxWopt = tmp;
 			}
 		}
-//		gsl_vector_complex_free(wOpt);
 
 		if(debugMode) {
 			std::string filename = "/tmp/gr_wOpt.txt";
@@ -533,7 +491,6 @@ namespace gr {
 			std::string filename3 = "/tmp/gr_whFilt.txt";
 			qa_helpers::writeComplexFile(filename3, whFilt);
 		}
-
 
 		// normalize
 		std::vector<float> whFiltAbs(whFilt.size());

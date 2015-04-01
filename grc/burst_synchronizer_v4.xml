@@ -4,7 +4,7 @@
   <key>burst_synchronizer_v4</key>
   <category>burst</category>
   <import>import burst</import>
-  <make>burst.synchronizer_v4($fs, $sps)</make>
+  <make>burst.synchronizer_v4($fs, $sps, $preamble_bits, $sym_mapping)</make>
 
   <param>
     <name>Samples per Symbol</name>
