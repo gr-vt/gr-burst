@@ -64,9 +64,9 @@ namespace gr {
       fft::fft_complex preIFFTEngine;
 
       std::vector<gr_complex> preSyms_fliplr_conj;			// preamble bits size / 2
-      std::vector<gr_complex> preSyms_x2_fliplr_conj;		// ( preamble bits size / 2 )* sps
-//      static const gr_complex preSyms_x2_fliplr_conj[96];
+      std::vector<gr_complex> preSyms_xR_fliplr_conj;		// ( preamble bits size / 2 )* sps
 
+      int optimalFilterSize;
       std::vector<gr_complex> wOpt_gr;
       gsl_vector_complex* wOpt;
 

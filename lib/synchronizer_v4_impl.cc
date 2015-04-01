@@ -52,12 +52,13 @@ namespace gr {
       : gr::sync_block("synchronizer_v4",
               gr::io_signature::make(0, 0, 0),
               gr::io_signature::make(0, 0, 0)),
-              preFFTEngine(128),
-              preIFFTEngine(128),
-              wOpt_gr(48),
-              preSymsSize(preamble_bits.size()/2),
+              optimalFilterSize(48),			// TODO: the size of the optimal filter should be based on preamble size ... currently hardcoded to 48 taps
+              preSymsSize(preamble_bits.size()/2),				// divide by 2 b/c this is QPSK specific, 2 bits/sym
               preSymsRateMatchedSize(preSymsSize*sps),
-              d_const(mapper::QPSK, sym_mapping, gr_complex(1,0))
+              d_const(mapper::QPSK, sym_mapping, gr_complex(1,0)),
+              preFFTEngineFFTSize(128),							// setup the FFT/IFFT engine sizes, TODO: should be 2^nextpow2(preSymsRateMatchedSize)
+              preFFTEngine(preFFTEngineFFTSize),				// initialize the FFT engine to the FFT Size
+              preIFFTEngine(preFFTEngineFFTSize)				// initialize the IFFT engine to the appropriate size
     {
     	message_port_register_in(pmt::mp("cpdus"));
 		message_port_register_out(pmt::mp("cpdus"));
@@ -68,34 +69,33 @@ namespace gr {
     	d_Fs = Fs;
     	d_sps = sps;
 
-    	preFFTEngineFFTSize = 128;
-
         preSyms_fliplr_conj.resize(preSymsSize);
-        preSyms_x2_fliplr_conj.resize(preSymsRateMatchedSize);
-    	wOpt = gsl_vector_complex_alloc(48);
+        preSyms_xR_fliplr_conj.resize(preSymsRateMatchedSize);
+        wOpt_gr.resize(optimalFilterSize);
+    	wOpt = gsl_vector_complex_alloc(optimalFilterSize);
 
     	// map the preamble bits to symbols, both x1 and x2 ... and flip both vectors for correlation purposes
     	d_const.map(&preamble_bits[0], &preSyms_fliplr_conj[0], preSymsSize, 0);		// after this operation, we are still not flipped and conjugated yet
     	// upsample
 		int jj = 0;
 		for(int ii=0; ii<preSymsRateMatchedSize; ii++) {
-			if(ii%2==1) {
-				preSyms_x2_fliplr_conj[ii].real() = 0;
-				preSyms_x2_fliplr_conj[ii].imag() = 0;
+			if(ii%sps==1) {
+				preSyms_xR_fliplr_conj[ii].real() = 0;
+				preSyms_xR_fliplr_conj[ii].imag() = 0;
 			}
 			else {
-				preSyms_x2_fliplr_conj[ii].real() = preSyms_fliplr_conj[jj].real();
-				preSyms_x2_fliplr_conj[ii].imag() = preSyms_fliplr_conj[jj].imag();
+				preSyms_xR_fliplr_conj[ii].real() = preSyms_fliplr_conj[jj].real();
+				preSyms_xR_fliplr_conj[ii].imag() = preSyms_fliplr_conj[jj].imag();
 				jj++;
 			}
 		}
-		// TODO: filter the preSyms_x2_fliplr_conj
+		// TODO: filter the preSyms_xR_fliplr_conj
 
 		std::reverse(preSyms_fliplr_conj.begin(),preSyms_fliplr_conj.end());			// flip the x1 preamble symbols
-    	std::reverse(preSyms_x2_fliplr_conj.begin(),preSyms_x2_fliplr_conj.end());		// flip the x2 preamble symbols
+    	std::reverse(preSyms_xR_fliplr_conj.begin(),preSyms_xR_fliplr_conj.end());		// flip the x2 preamble symbols
 
 		conjugate(&preSyms_fliplr_conj[0], &preSyms_fliplr_conj[0], preSyms_fliplr_conj.size());				// conjugate the x1 preamble symbols
-		conjugate(&preSyms_x2_fliplr_conj[0], &preSyms_x2_fliplr_conj[0], preSyms_x2_fliplr_conj.size());       // conjugate the x2 preamble symbols
+		conjugate(&preSyms_xR_fliplr_conj[0], &preSyms_xR_fliplr_conj[0], preSyms_xR_fliplr_conj.size());       // conjugate the x2 preamble symbols
 
     	debugMode = false;
     }
@@ -106,6 +106,7 @@ namespace gr {
     synchronizer_v4_impl::~synchronizer_v4_impl()
     {
     	gsl_vector_complex_free(wOpt);
+    	// TODO: does the FFT engine destruct itself, or do we need to destroy it?
     }
 
     void synchronizer_v4_impl::enableDebugMode() {
@@ -130,7 +131,7 @@ namespace gr {
 		gr_complex* fftOutBuf = fftEngine.get_outbuf();
 		std::vector<float> fftOutAbs(burstSize, 0.0);
 		// fill the FFT buffer
-		volk_32fc_s32f_power_32fc(fftInBuf, x_in, 4, burstSize);
+		volk_32fc_s32f_power_32fc(fftInBuf, x_in, 4, burstSize);		// compute signal^4 FFT (b/c this is QPSK specific)
 
 		if(debugMode) {
 			std::string filename = "/tmp/gr_cfoFFTInput.txt";
@@ -219,16 +220,16 @@ namespace gr {
     void synchronizer_v4_impl::determineOptimalFilter(gsl_vector_complex* w, gr_complex* x, int xLen) {
     	gr_complex* fftInBuf = preFFTEngine.get_inbuf();
     	// fill the fft input buffer
-    	memcpy(&fftInBuf[0], &x[0], 48*sizeof(gr_complex));
-    	memset(&fftInBuf[48], 0, 80*sizeof(gr_complex));
+    	memcpy(&fftInBuf[0], &x[0], optimalFilterSize*sizeof(gr_complex));
+    	memset(&fftInBuf[optimalFilterSize], 0, (preFFTEngineFFTSize-optimalFilterSize)*sizeof(gr_complex));
 
     	preFFTEngine.execute();
     	gr_complex* fftOutBuf = preFFTEngine.get_outbuf();
 
     	if(debugMode) {
 			std::string filename = "/tmp/gr_dofFFTOutput.txt";
-			std::vector<gr_complex> b(128);
-			b.assign(fftOutBuf, fftOutBuf+128);
+			std::vector<gr_complex> b(preFFTEngineFFTSize);
+			b.assign(fftOutBuf, fftOutBuf+preFFTEngineFFTSize);
 			qa_helpers::writeComplexFile(filename, b);
 		}
 
@@ -241,8 +242,8 @@ namespace gr {
 
     	if(debugMode) {
 			std::string filename = "/tmp/gr_dofIFFTInput.txt";
-			std::vector<float> b(128);
-			for(int ii=0; ii<128; ii++) {
+			std::vector<float> b(preFFTEngineFFTSize);
+			for(int ii=0; ii<preFFTEngineFFTSize; ii++) {
 				b[ii] = ifftInBuf[ii].real();
 			}
 			qa_helpers::writeFloatFile(filename, b);
@@ -253,8 +254,8 @@ namespace gr {
 
     	if(debugMode) {
 			std::string filename = "/tmp/gr_dofIFFTOutput.txt";
-			std::vector<gr_complex> b(128);
-			b.assign(ifftOutBuf, ifftOutBuf+128);
+			std::vector<gr_complex> b(preFFTEngineFFTSize);
+			b.assign(ifftOutBuf, ifftOutBuf+preFFTEngineFFTSize);
 			qa_helpers::writeComplexFile(filename, b);
 		}
 
@@ -264,8 +265,8 @@ namespace gr {
 		std::vector<gr_complex> col(preSymsSize);
     	for(int ii=0; ii<preSymsSize; ii++) {
     		// downscale by m and the ifft size
-    		col[ii] = std::conj(ifftOutBuf[ii])*1.0f/(48.0f*128.0f);
-    		row[ii] = ifftOutBuf[ii]*1.0f/(48.0f*128.0f);
+    		col[ii] = std::conj(ifftOutBuf[ii])*1.0f/(((float)(optimalFilterSize))*((float)(preFFTEngineFFTSize)));
+    		row[ii] = ifftOutBuf[ii]*1.0f/(((float)(optimalFilterSize))*((float)(preFFTEngineFFTSize)));
     	}
 
     	if(debugMode) {
@@ -278,22 +279,20 @@ namespace gr {
     	gsl_matrix_complex* R = gsl_matrix_complex_alloc(preSymsSize, preSymsSize);
     	toeplitz(&col[0], preSymsSize, &row[0], preSymsSize, R);
 
-    	std::vector<gr_complex> xc(95);
+    	std::vector<gr_complex> xc(preSymsSize+preSymsSize-1);
     	// compute correlation between preSyms and x[1:48]
-    	std::vector<gr_complex> x_in(144, gr_complex(0,0));
-    	memcpy(&x_in[0], &x[0], sizeof(gr_complex)*48);
     	// the difference in the cross-correlations between the zero-pad and the non-zeropad are small,
     	// not sure if we can get away w/ doing no zeropad?? investigate w/ perofrmacne
-    	conv(&x[0], 48, &preSyms_fliplr_conj[0], 48, xc);
+    	conv(&x[0], preSymsSize, &preSyms_fliplr_conj[0], preSymsSize, xc);
 
     	if(debugMode) {
 			std::string filename = "/tmp/gr_dofxc.txt";
 			qa_helpers::writeComplexFile(filename, xc);
 
 			// do this to make sure we load P properly as debugging measure
-			std::vector<gr_complex> P(48);
+			std::vector<gr_complex> P(optimalFilterSize);
 			int jj = xc.size()-1;
-			for(int ii=0; ii<48; ii++) {
+			for(int ii=0; ii<optimalFilterSize; ii++) {
 				P[ii] = gr_complex(xc[jj].real(), -xc[jj].imag() );
 				jj--;
 			}
@@ -302,10 +301,10 @@ namespace gr {
 		}
 
     	// make P vector
-        gsl_vector_complex* P = gsl_vector_complex_alloc(48);
+        gsl_vector_complex* P = gsl_vector_complex_alloc(optimalFilterSize);
     	gsl_complex cval;
     	int jj = xc.size()-1;
-    	for(int ii=0; ii<48; ii++) {
+    	for(int ii=0; ii<optimalFilterSize; ii++) {
     		GSL_SET_COMPLEX(&cval, xc[jj].real(), -xc[jj].imag());
     		gsl_vector_complex_set(P, ii, cval);
     		jj--;
@@ -313,9 +312,10 @@ namespace gr {
 
     	// solve for R
     	int s;
-    	gsl_permutation * p = gsl_permutation_alloc(48);
+    	gsl_permutation * p = gsl_permutation_alloc(optimalFilterSize);
     
         // sizes ...
+    	// if optimalFilterSize = 48 ... the sizes below are shown as such for readability
         // R = [ 48x48 ]
         // p = [ 48x1 ]
         // s = [ 1x1 ]
@@ -406,14 +406,12 @@ namespace gr {
 
 
         // publish debug port #1
-        if(1){
-            pmt::pmt_t cfo_vec = pmt::init_c32vector(eqBurst.size(), &eqBurst[0]);
-            message_port_pub(pmt::mp("debug_post_cfo"), pmt::cons( meta, cfo_vec ) );
-        }
+		pmt::pmt_t cfo_vec = pmt::init_c32vector(eqBurst.size(), &eqBurst[0]);
+		message_port_pub(pmt::mp("debug_post_cfo"), pmt::cons( meta, cfo_vec ) );
 
         // search for start index/timing
-		std::vector<gr_complex> preCrossCorr_cmplx(96+eqBurst.size()-1);
-		conv(&eqBurst[0], eqBurst.size(), &preSyms_x2_fliplr_conj[0], 96, preCrossCorr_cmplx);
+		std::vector<gr_complex> preCrossCorr_cmplx(preSymsRateMatchedSize+eqBurst.size()-1);
+		conv(&eqBurst[0], eqBurst.size(), &preSyms_xR_fliplr_conj[0], preSymsRateMatchedSize, preCrossCorr_cmplx);
 
 		std::vector<float> preCrossCorr(preCrossCorr_cmplx.size());
 		int maxIdx = 0;
@@ -426,7 +424,7 @@ namespace gr {
 			}
 		}
 
-		int preambleIdxStart = maxIdx - 96 + 1;
+		int preambleIdxStart = maxIdx - preSymsRateMatchedSize + 1;
 		if(debugMode) {
 			std::string f1 = "/tmp/gr_preCrossCorr.txt";
 			qa_helpers::writeFloatFile(f1, preCrossCorr);
@@ -438,10 +436,8 @@ namespace gr {
 		}
 
         // publish debug port #2
-        if(1){
-            pmt::pmt_t xcorr_vec = pmt::init_f32vector(preCrossCorr.size(), &preCrossCorr[0]);
-            message_port_pub(pmt::mp("debug_pre_xcorr"), pmt::cons( meta, xcorr_vec ) );
-        }
+		pmt::pmt_t xcorr_vec = pmt::init_f32vector(preCrossCorr.size(), &preCrossCorr[0]);
+		message_port_pub(pmt::mp("debug_pre_xcorr"), pmt::cons( meta, xcorr_vec ) );
 
 		if(preambleIdxStart<0) {
 			// means we didn't find the preamble, quit
@@ -463,10 +459,10 @@ namespace gr {
 		determineOptimalFilter(wOpt, &eqIn_decimated[0], eqIn_decimated.size());
 
 		// filter
-		std::vector<gr_complex> whFilt(eqIn_decimated.size()+48-1);
+		std::vector<gr_complex> whFilt(eqIn_decimated.size()+optimalFilterSize-1);
 		float maxWopt = -999999;
 		float tmp;
-		for(int ii=0; ii<48; ii++) {
+		for(int ii=0; ii<optimalFilterSize; ii++) {
 			gsl_complex c = gsl_vector_complex_get(wOpt, ii);
 			wOpt_gr[ii] = gr_complex(GSL_REAL(c), GSL_IMAG(c));
 			tmp = std::abs(wOpt_gr[ii]);
@@ -518,7 +514,7 @@ namespace gr {
 		}
 
 		// put into new pdu and send
-        int offset = (96)/2-1;
+        int offset = (preSymsRateMatchedSize)/2-1;
 		pmt::pmt_t newvec = pmt::init_c32vector(phRecoveredSyms.size()-offset, &phRecoveredSyms[offset]);
         meta = pmt::dict_add(meta, pmt::mp("cfo"), pmt::mp(cfo));
         meta = pmt::dict_add(meta, pmt::mp("sync_delay"), pmt::mp(preambleIdxStart));
