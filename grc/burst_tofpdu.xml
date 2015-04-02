@@ -4,7 +4,7 @@
   <key>burst_tofpdu</key>
   <category>burst</category>
   <import>import burst</import>
-  <make>burst.slicer()</make>
+  <make>burst.tofpdu()</make>
 
   <sink>
     <name>pdus</name>
