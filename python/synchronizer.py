@@ -3,7 +3,6 @@
 from gnuradio import gr;
 import pmt,numpy;
 from scipy import signal
-import pylab
 
 # timing algorithm from 00585803.pdf
 class synchronizer(gr.sync_block):
