@@ -49,6 +49,7 @@ from burst_swig import *
 from burst_scheduler import *
 from burst_scheduler2 import *
 from unpacker import *
+from packer import *
 from framer import *
 from slicer import *
 from tofpdu import *

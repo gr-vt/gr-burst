@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<block>
+  <name>Async PDU Bit Packer</name>
+  <key>burst_packer</key>
+  <category>burst</category>
+  <import>import burst</import>
+  <make>burst.packer()</make>
+
+  <sink>
+    <name>pdus</name>
+    <type>message</type>
+    <optional>1</optional>
+  </sink>
+  <source>
+    <name>pdus</name>
+    <type>message</type>
+    <optional>1</optional>
+  </source>
+
+</block>

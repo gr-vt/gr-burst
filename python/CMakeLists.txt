@@ -47,6 +47,7 @@ GR_PYTHON_INSTALL(
     preamble_correlator.py
     pdulib.py
     unpacker.py
+    packer.py
     length_detect.py
     cpdu_matlab_writer.py
     #synchronizer.py
