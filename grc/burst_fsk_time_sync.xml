@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<block>
+  <name>Burst FSK Time Sync</name>
+  <key>burst_fsk_time_sync</key>
+  <category>burst</category>
+  <import>import burst</import>
+  <make>burst.fsk_time_sync()</make>
+
+  <sink>
+    <name>pdus</name>
+    <type>message</type>
+    <optional>1</optional>
+  </sink>
+  <source>
+    <name>pdus</name>
+    <type>message</type>
+    <optional>1</optional>
+  </source>
+  <source>
+    <name>autocorr</name>
+    <type>message</type>
+    <optional>1</optional>
+  </source>
+  <source>
+    <name>timing</name>
+    <type>message</type>
+    <optional>1</optional>
+  </source>
+
+</block>
