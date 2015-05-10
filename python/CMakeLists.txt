@@ -41,6 +41,7 @@ GR_PYTHON_INSTALL(
     tofpdu.py
     deframer.py
     framealign.py
+    fsk_time_sync.py
     randomizer.py
     preamble_insert.py
     preamble_correlator.py

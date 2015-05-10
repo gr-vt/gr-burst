@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from gnuradio import gr;
-import pmt, sys, pprint, bitarray, array, struct, binascii
+import numpy, pmt, sys, pprint, bitarray, array, struct, binascii
 
 class slicer(gr.sync_block):
     def __init__(self, blocksize=1024):
@@ -10,21 +10,16 @@ class slicer(gr.sync_block):
         self.message_port_register_out(pmt.intern("pdus"));
         self.set_msg_handler(pmt.intern("fpdus"), self.handler);
 
-    def handler(self, msg):
-        ba = bitarray.bitarray();
-        meta = pmt.car(msg);
-        data = pmt.cdr(msg);
-        
-        # convert pmt -> int list (of bits)
-        data = array.array('f', pmt.f32vector_elements(data))
-        bindata = map(lambda x: x > 0, data);
-        bindatap = pmt.init_u8vector(len(bindata), bindata);
+    def handler(self, pdu):
+        # grab float vector from pdu
+        meta = pmt.car(pdu);
+        x = pmt.to_python(pmt.cdr(pdu))
 
-        # make the new pdu
-        pdu = pmt.cons(meta, bindatap);
+        # convert to uint8 vector of mapped bits
+        bindata = numpy.array(map(lambda x: x > 0, x), dtype='uint8')
 
         # send it on its way
-        self.message_port_pub(pmt.intern("pdus"), pdu);
+        self.message_port_pub(pmt.intern("pdus"), pmt.cons(meta, pmt.to_pmt(bindata)))
 
     def work(self, input_items, output_items):
         pass

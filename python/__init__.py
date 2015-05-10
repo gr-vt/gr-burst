@@ -54,6 +54,7 @@ from slicer import *
 from tofpdu import *
 from deframer import *
 from framealign import *
+from fsk_time_sync import fsk_time_sync
 from randomizer import *
 from preamble_insert import *
 from preamble_correlator import *

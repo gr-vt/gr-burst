@@ -24,6 +24,7 @@ install(FILES
     burst_scheduler2.xml
     burst_unpacker.xml
     burst_framer.xml
+    burst_fsk_time_sync.xml
     burst_slicer.xml
     burst_tofpdu.xml
     burst_deframer.xml
