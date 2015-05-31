@@ -22,7 +22,6 @@ class preamble_insert(gr.sync_block):
         burst_bits = pmt.init_u8vector(len(pre_data), pre_data.tolist());
         pdu = pmt.cons(meta, burst_bits);
         self.message_port_pub(pmt.intern("pdus"), pdu);
-        print "Send input"
     
     def work(self, input_items, output_items):
         pass
