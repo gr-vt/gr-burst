@@ -5,26 +5,29 @@ import pmt,numpy;
 from scipy import signal
 
 class fsk_time_sync(gr.sync_block):
-    def __init__(self, R=100.0):
+    def __init__(self, sample_rate=32e3, sps=None, upsample_rate=100.0, n_offsets = 10.0):
         gr.sync_block.__init__(self,"fsk_synchronizer",[],[])
         self.message_port_register_in(pmt.intern("pdus"));
         self.message_port_register_out(pmt.intern("pdus"));
         self.message_port_register_out(pmt.intern("autocorr"));
         self.message_port_register_out(pmt.intern("timing"));
         self.set_msg_handler(pmt.intern("pdus"), self.handler);
+        self.sample_rate = sample_rate
+        self.sps = sps
 
-        self.R = R
-        self.sps = 0
+        self.upsample_rate = upsample_rate
+        self.sps = sps
         self.nburst = 0;
         self.nburst_ok = 0;
         self.sps_samps = []
+        self.n_offsets = n_offsets
 
     def handler(self, msg):
         # get input
         meta = pmt.car(msg);
         x = pmt.to_python(pmt.cdr(msg))
 
-        if( len(self.sps_samps) < 10):
+        if( self.sps == None and len(self.sps_samps) < 10):
             # compute the cross correlation metric first peak (to find baud rate)
             (clen, ncut) = (500,500)
             e = numpy.zeros(clen*2-1)
@@ -35,7 +38,7 @@ class fsk_time_sync(gr.sync_block):
 
             # upsample to xcorr to interpolate fractional sym rate
             e = e[clen-1:]
-            e_upsamp = signal.resample(e, self.R*len(e))
+            e_upsamp = signal.resample(e, self.upsample_rate*len(e))
             e_upsamp = e_upsamp[:len(e_upsamp)/2]
             #e_upsamp = e_upsamp[0:len(e_upsamp)/2]
             self.message_port_pub(pmt.intern("autocorr"), pmt.cons(meta, pmt.to_pmt(e_upsamp)))
@@ -45,7 +48,7 @@ class fsk_time_sync(gr.sync_block):
             firstmax = firstmin + numpy.argmax(e_upsamp[firstmin:])
 
             # determine samples per symbol
-            sps = firstmax/self.R
+            sps = firstmax/self.upsample_rate
             self.sps_samps.append(sps)
             self.sps = numpy.mean(self.sps_samps)
         else:
@@ -56,7 +59,7 @@ class fsk_time_sync(gr.sync_block):
         
         ovf = []
         ovals = {}
-        n_offsets = 10.0
+        n_offsets = float(self.n_offsets)
         nsyms = (len(x)/sps)-1
         best = 0
         best_syms = None

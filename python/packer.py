@@ -3,7 +3,7 @@
 from gnuradio import gr;
 import pmt;
 import sys;
-import bitarray, array
+import bitarray, array, numpy
 
 class packer(gr.sync_block):
     def __init__(self):

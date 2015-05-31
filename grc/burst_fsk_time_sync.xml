@@ -4,7 +4,38 @@
   <key>burst_fsk_time_sync</key>
   <category>burst</category>
   <import>import burst</import>
-  <make>burst.fsk_time_sync()</make>
+  <make>burst.fsk_time_sync($samp_rate, $sps, $R, $n_offsets)</make>
+
+  <param>
+    <name>Sample Rate</name>
+    <key>samp_rate</key>
+    <value>samp_rate</value>
+    <type>float</type>
+  </param>
+
+
+  <param>
+    <name>Samples per Symbol (float)</name>
+    <key>sps</key>
+    <value>None</value>
+    <type>raw</type>
+  </param>
+
+
+  <param>
+    <name>Upsample Ratio (Sps est)</name>
+    <key>R</key>
+    <value>100.0</value>
+    <type>float</type>
+  </param>
+
+  <param>
+    <name>N Timing Offsets</name>
+    <key>n_offsets</key>
+    <value>10</value>
+    <type>int</type>
+  </param>
+
 
   <sink>
     <name>pdus</name>
