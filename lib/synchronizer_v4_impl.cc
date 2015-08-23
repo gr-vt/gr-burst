@@ -80,12 +80,12 @@ namespace gr {
 		int jj = 0;
 		for(int ii=0; ii<preSymsRateMatchedSize; ii++) {
 			if(ii%sps==1) {
-				preSyms_xR_fliplr_conj[ii].real() = 0;
-				preSyms_xR_fliplr_conj[ii].imag() = 0;
+				preSyms_xR_fliplr_conj[ii].real(0);
+				preSyms_xR_fliplr_conj[ii].imag(0);
 			}
 			else {
-				preSyms_xR_fliplr_conj[ii].real() = preSyms_fliplr_conj[jj].real();
-				preSyms_xR_fliplr_conj[ii].imag() = preSyms_fliplr_conj[jj].imag();
+				preSyms_xR_fliplr_conj[ii].real(preSyms_fliplr_conj[jj].real());
+				preSyms_xR_fliplr_conj[ii].imag(preSyms_fliplr_conj[jj].imag());
 				jj++;
 			}
 		}
@@ -231,8 +231,8 @@ namespace gr {
     	// take the output, and store the absolute value in an array
     	gr_complex* ifftInBuf = preFFTEngine.get_inbuf();
     	for(int ii=0; ii<preFFTEngineFFTSize; ii++) {
-    		ifftInBuf[ii].real() = pow( std::abs(fftOutBuf[ii]), 2);
-    		ifftInBuf[ii].imag() = 0;
+                ifftInBuf[ii].real(pow( std::abs(fftOutBuf[ii]), 2));
+                ifftInBuf[ii].imag(0);
     	}
 
     	if(debugMode) {
@@ -357,20 +357,20 @@ namespace gr {
 
             // demodulating circuit
 			if(y[ii].real()>=0 && y[ii].imag()>=0) {
-				xHat.real() = M_SQRT1_2;
-				xHat.imag() = M_SQRT1_2;
+				xHat.real(M_SQRT1_2);
+				xHat.imag(M_SQRT1_2);
 			}
 			else if(y[ii].real()>=0 && y[ii].imag()<0) {
-				xHat.real() = M_SQRT1_2;
-				xHat.imag() = -M_SQRT1_2;
+				xHat.real(M_SQRT1_2);
+				xHat.imag(-M_SQRT1_2);
 			}
 			else if(y[ii].real()<0 && y[ii].imag()<0) {
-				xHat.real() = -M_SQRT1_2;
-				xHat.imag() = -M_SQRT1_2;
+				xHat.real(-M_SQRT1_2);
+				xHat.imag(-M_SQRT1_2);
 			}
 			else {
-				xHat.real() = -M_SQRT1_2;
-				xHat.imag() = M_SQRT1_2;
+				xHat.real(-M_SQRT1_2);
+				xHat.imag(M_SQRT1_2);
 			}
 
 			// loop filter to update phase estimate

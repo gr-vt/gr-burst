@@ -16,8 +16,8 @@ std::vector<gr_complex> qa_helpers::readComplexFile(std::string filename) {
 	while(infile>>realPart) {
 		infile >> imagPart;
 		gr_complex num;
-		num.real() = realPart;
-		num.imag() = imagPart;
+		num.real(realPart);
+		num.imag(imagPart);
 		complexData.push_back(num);
 	}
 
@@ -35,8 +35,8 @@ std::vector< std::vector<gr_complex> > qa_helpers::readComplexFileAsMat(std::str
 			infile >> realPart;
 			infile >> imagPart;
 			gr_complex num;
-			num.real() = realPart;
-			num.imag() = imagPart;
+			num.real(realPart);
+			num.imag(imagPart);
 			row[jj] = num;
 		}
 		cmplxMat.push_back(row);
