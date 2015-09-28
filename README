@@ -1,3 +1,4 @@
 
 This out of tree module contains a number of blocks which help enable building simple burst PSK modems in GNU Radio
 
+install python-bitarray and build/install gr-mapper
