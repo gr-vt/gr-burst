@@ -101,7 +101,7 @@ namespace gr {
         }
 
         // find max power / threshold power 6dB down
-        unsigned int max_idx;
+        uint16_t max_idx;
         volk_32f_index_max_16u(&max_idx, &magavg[0], magavg.size());
         float max_val = magavg[max_idx];
         float thresh_val = max_val / 16;
