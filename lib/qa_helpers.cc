@@ -182,7 +182,7 @@ std::vector<std::string> qa_helpers::getFilesInDir(const std::string& pat) {
 
 bool qa_helpers::fileExists(const char *filename) {
   std::ifstream ifile(filename);
-  return ifile;
+  return ifile.good();
 }
 
 // Get the size of a file
